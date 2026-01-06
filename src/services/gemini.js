@@ -24,12 +24,10 @@ const createPrompt = (word, count, context, themes = [], strictMode = false) => 
   }
   
   if (themes && themes.length > 0) {
-    contextStr += `\n头脑风暴主题 (Brainstorming Themes)：[${themes.join(', ')}]`;
     if (strictMode) {
+      contextStr += `\n头脑风暴主题 (Brainstorming Themes)：[${themes.join(', ')}]`;
       contextStr += `\n‼ 重要限制：你必须严格围绕上述“头脑风暴主题”进行发散。生成的联想词必须体现这些主题的核心概念，不得偏离主题。`;
-    } else {
-      contextStr += `\n请在发散时考虑到上述主题，生成的词语最好能与主题呼应。`;
-    }
+    } 
   }
 
   return `请生成 ${count} 个与词语 '${word}' 强相关的发散性联想词。${contextStr}
