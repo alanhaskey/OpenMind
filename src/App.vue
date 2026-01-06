@@ -6,12 +6,14 @@ import LogoPiece from './components/UI/LogoPiece.vue';
 import ControlPanel from './components/UI/ControlPanel.vue';
 import Modal from './components/UI/Modal.vue';
 import SettingsModal from './components/UI/SettingsModal.vue';
+import AboutModal from './components/UI/AboutModal.vue';
 import { getRelatedWords } from './services/gemini';
 
 const graphRef = ref(null);
 const hasStarted = ref(false);
 const showResetModal = ref(false);
 const showSettingsModal = ref(false);
+const showAboutModal = ref(false);
 const showTranslation = ref(true);
 
 const handleInputSubmit = async (text) => {
@@ -109,7 +111,7 @@ const onExportRequest = () => {
 
 <template>
   <div id="app-container">
-    <LogoPiece />
+    <LogoPiece @click="showAboutModal = true" />
     
     <GraphCanvas
       ref="graphRef"
@@ -143,6 +145,11 @@ const onExportRequest = () => {
       :show="showSettingsModal"
       @close="showSettingsModal = false"
       @save="handleSettingsSave"
+    />
+
+    <AboutModal
+      :show="showAboutModal"
+      @close="showAboutModal = false"
     />
   </div>
 </template>

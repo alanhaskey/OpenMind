@@ -1,5 +1,5 @@
 <template>
-  <div class="logo">
+  <div class="logo" @click="$emit('click')">
     <span class="text">OpenMind</span>
   </div>
 </template>
@@ -10,7 +10,8 @@
   top: 20px;
   left: 30px;
   z-index: 50;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .text {
