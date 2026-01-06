@@ -15,8 +15,8 @@ const emit = defineEmits(['confirm', 'cancel']);
         <h3>{{ title }}</h3>
         <p>{{ message }}</p>
         <div class="actions">
-          <button class="btn cancel" @click="$emit('cancel')">Cancel</button>
-          <button class="btn confirm" @click="$emit('confirm')">Confirm</button>
+          <button class="btn cancel" @click="$emit('cancel')">取消</button>
+          <button class="btn confirm" @click="$emit('confirm')">确定</button>
         </div>
       </div>
     </div>

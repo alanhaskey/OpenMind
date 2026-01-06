@@ -133,8 +133,8 @@ const onExportRequest = () => {
     
     <Modal
       :show="showResetModal"
-      title="Clear Canvas"
-      message="Are you sure you want to clear all nodes? This action cannot be undone."
+      title="重置画布"
+      message="确定要清空画布吗？此操作无法撤销。"
       @confirm="confirmReset"
       @cancel="showResetModal = false"
     />
