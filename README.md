@@ -2,7 +2,7 @@
 
 OpenMind 是一个现代化的、基于 AI 驱动的**视觉化头脑风暴工具**。它将你的思维导图与大语言模型（LLM）相结合，帮助你发现看似无关概念之间的隐秘联系，激发无限创意。
 
-![OpenMind Banner](public/openmind.svg)
+![OpenMind Banner](public/openmind.svg){: width="150px" }
 
 ## ✨ 主要功能 (Features)
 
@@ -37,7 +37,7 @@ OpenMind 是一个现代化的、基于 AI 驱动的**视觉化头脑风暴工�
 1.  克隆仓库:
 
     ```bash
-    git clone https://github.com/yourusername/OpenMind.git
+    git clone https://github.com/alanhaskey/OpenMind.git
     cd OpenMind
     ```
 
