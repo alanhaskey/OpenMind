@@ -23,11 +23,11 @@ const emit = defineEmits(['close']);
           </div>
           <div class="row">
             <span class="label">GitHub</span>
-            <a class="value" href="https://github.com/alanhaskey/OpenMind">alanhaskey | OpenMind</a>
+            <a class="value" href="https://github.com/alanhaskey/OpenMind" target="_blank">alanhaskey | OpenMind</a>
           </div>
           <div class="row">
             <span class="label">当前版本</span>
-            <span class="value">v1.0.1</span>
+            <span class="value">v1.0.2</span>
           </div>
         </div>
 

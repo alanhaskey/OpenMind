@@ -36,7 +36,8 @@
       "electron/**/*"
     ],
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "public/openmind.ico"
     },
     "nsis": {
       "oneClick": false,

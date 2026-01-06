@@ -21,7 +21,7 @@ const handleSubmit = () => {
       <input
         v-model="inputValue"
         type="text"
-        placeholder="🧠风暴一下..."
+        placeholder="头脑风暴一下..."
         @keyup.enter="handleSubmit"
         class="input-field"
       />

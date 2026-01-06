@@ -9,6 +9,8 @@ import SettingsModal from './components/UI/SettingsModal.vue';
 import AboutModal from './components/UI/AboutModal.vue';
 import NodeActions from './components/UI/NodeActions.vue';
 import EditNodeModal from './components/UI/EditNodeModal.vue';
+import StrictModeToggle from './components/UI/StrictModeToggle.vue';
+import Toast from './components/UI/Toast.vue'; // New Import
 import { getRelatedWords } from './services/gemini';
 
 const graphRef = ref(null);
@@ -18,9 +20,21 @@ const showSettingsModal = ref(false);
 const showAboutModal = ref(false);
 const showEditModal = ref(false);
 const showTranslation = ref(true);
+const strictMode = ref(false);
+
+// Toast State
+const showToast = ref(false);
+const toastMessage = ref('');
+const toastType = ref('warning');
 
 const editingNodeId = ref(null);
 const editingNodeText = ref('');
+
+const showToastMessage = (msg, type = 'warning') => {
+  toastMessage.value = msg;
+  toastType.value = type;
+  showToast.value = true;
+};
 
 const hasSelection = computed(() => {
   return graphRef.value && graphRef.value.selectedNodeIds && graphRef.value.selectedNodeIds.length > 0;
@@ -50,16 +64,24 @@ const handleNodeClick = async (node) => {
     // Contextual Brainstorming:
     // Gather text from other selected nodes (Green/Blue ones) to guide the AI
     let contextWords = [];
+    let themes = [];
+
     if (graphRef.value && graphRef.value.nodes) {
       const selectedIds = graphRef.value.selectedNodeIds;
       contextWords = graphRef.value.nodes
         .filter(n => selectedIds.includes(n.id) && n.id !== node.id) // Exclude current clicked node
         .map(n => n.text);
+        
+      // Requirements: Yellow nodes are Brainstorming Themes.
+      // Gather all 'center' (yellow) nodes.
+      themes = graphRef.value.nodes
+        .filter(n => n.isCenter)
+        .map(n => n.text);
     }
     
-    // Call API with context
+    // Call API with context and themes
     const count = parseInt(localStorage.getItem('generate_count') || 6);
-    const related = await getRelatedWords(node.text, count, contextWords);
+    const related = await getRelatedWords(node.text, count, contextWords, themes, strictMode.value);
     
     if (related && Array.isArray(related)) {
       related.forEach(item => {
@@ -71,6 +93,13 @@ const handleNodeClick = async (node) => {
     }
   } catch (e) {
     console.error("Failed to expand", e);
+    if (e.message && e.message.includes("Missing") && e.message.includes("Key")) {
+      showToastMessage("未配置 API Key，请在设置中配置", "warning"); // "Missing API Key, please configure in settings"
+      // Optionally open settings? 
+      // showSettingsModal.value = true; 
+    } else {
+       showToastMessage("生成失败，请重试", "error");
+    }
   } finally {
     node.isLoading = false;
   }
@@ -178,12 +207,16 @@ onUnmounted(() => {
   <div id="app-container">
     <LogoPiece @click="showAboutModal = true" />
     
+    <StrictModeToggle v-model="strictMode" />
+    <Toast v-if="showToast" :message="toastMessage" :type="toastType" @close="showToast = false" />
+    
     <GraphCanvas
       ref="graphRef"
       :show-translation="showTranslation"
       @node-click="handleNodeClick"
       @node-contextmenu="handleNodeContextmenu"
     />
+
     
     <InputBar
       :has-started="hasStarted"
