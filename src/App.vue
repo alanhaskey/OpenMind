@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import GraphCanvas from './components/Graph/GraphCanvas.vue';
 import InputBar from './components/UI/InputBar.vue';
 import LogoPiece from './components/UI/LogoPiece.vue';
@@ -7,6 +7,8 @@ import ControlPanel from './components/UI/ControlPanel.vue';
 import Modal from './components/UI/Modal.vue';
 import SettingsModal from './components/UI/SettingsModal.vue';
 import AboutModal from './components/UI/AboutModal.vue';
+import NodeActions from './components/UI/NodeActions.vue';
+import EditNodeModal from './components/UI/EditNodeModal.vue';
 import { getRelatedWords } from './services/gemini';
 
 const graphRef = ref(null);
@@ -14,7 +16,19 @@ const hasStarted = ref(false);
 const showResetModal = ref(false);
 const showSettingsModal = ref(false);
 const showAboutModal = ref(false);
+const showEditModal = ref(false);
 const showTranslation = ref(true);
+
+const editingNodeId = ref(null);
+const editingNodeText = ref('');
+
+const hasSelection = computed(() => {
+  return graphRef.value && graphRef.value.selectedNodeIds && graphRef.value.selectedNodeIds.length > 0;
+});
+
+const canEdit = computed(() => {
+  return hasSelection.value; // Logic: Always can edit if selected, but effective on Last Selected.
+});
 
 const handleInputSubmit = async (text) => {
   if (!text) return;
@@ -44,7 +58,8 @@ const handleNodeClick = async (node) => {
     }
     
     // Call API with context
-    const related = await getRelatedWords(node.text, 6, contextWords);
+    const count = parseInt(localStorage.getItem('generate_count') || 6);
+    const related = await getRelatedWords(node.text, count, contextWords);
     
     if (related && Array.isArray(related)) {
       related.forEach(item => {
@@ -107,6 +122,56 @@ const onExportRequest = () => {
   
   URL.revokeObjectURL(url);
 };
+
+// Node Actions
+const handleDeleteSelected = () => {
+  if (graphRef.value && hasSelection.value) {
+    graphRef.value.removeNodes(graphRef.value.selectedNodeIds);
+  }
+};
+
+const handleEditSelected = () => {
+  if (!graphRef.value || !hasSelection.value) return;
+  
+  // Edit the *Last Selected* node (Blue)
+  const ids = graphRef.value.selectedNodeIds;
+  const lastId = ids[ids.length - 1];
+  const node = graphRef.value.nodes.find(n => n.id === lastId);
+  
+  if (node) {
+    editingNodeId.value = node.id;
+    editingNodeText.value = node.text;
+    showEditModal.value = true;
+  }
+};
+
+const saveNodeEdit = (newText) => {
+  if (editingNodeId.value && graphRef.value) {
+    graphRef.value.updateNodeText(editingNodeId.value, newText);
+  }
+  showEditModal.value = false;
+};
+
+// Keyboard Shortcuts
+const handleKeydown = (e) => {
+  // Ignore if typing in input fields
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  
+  if (e.key.toLowerCase() === 'd') {
+    handleDeleteSelected();
+  }
+  if (e.key.toLowerCase() === 'e') {
+    handleEditSelected();
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown);
+});
 </script>
 
 <template>
@@ -150,6 +215,20 @@ const onExportRequest = () => {
     <AboutModal
       :show="showAboutModal"
       @close="showAboutModal = false"
+    />
+
+    <NodeActions
+      :show="hasSelection"
+      :can-edit="canEdit"
+      @delete="handleDeleteSelected"
+      @edit="handleEditSelected"
+    />
+
+    <EditNodeModal
+      :show="showEditModal"
+      :initial-text="editingNodeText"
+      @close="showEditModal = false"
+      @save="saveNodeEdit"
     />
   </div>
 </template>

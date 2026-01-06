@@ -18,7 +18,7 @@ const width = ref(window.innerWidth);
 const height = ref(window.innerHeight);
 const transformStyle = ref({ transform: 'translate(0,0) scale(1)' });
 
-const { nodes, links, initSimulation, updateDimensions, addNode, toggleSelection, selectedNodeIds, clearGraph, clearSelection, getGraphData, dragStarted, dragged, dragEnded } = useGraph(width.value, height.value);
+const { nodes, links, initSimulation, updateDimensions, addNode, toggleSelection, selectedNodeIds, clearGraph, clearSelection, removeNodes, updateNodeText, getGraphData, dragStarted, dragged, dragEnded } = useGraph(width.value, height.value);
 
 const handleResize = () => {
   width.value = window.innerWidth;
@@ -53,6 +53,7 @@ const vDraggable = {
     const node = binding.value;
     d3.select(el).call(
       d3.drag()
+        .subject(() => node)
         .on('start', (event) => dragStarted(event, node))
         .on('drag', (event) => dragged(event, node))
         .on('end', (event) => dragEnded(event, node))
@@ -77,6 +78,8 @@ defineExpose({
   nodes,
   clearGraph,
   clearSelection,
+  removeNodes,
+  updateNodeText,
   getGraphData,
 });
 

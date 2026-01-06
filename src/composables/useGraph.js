@@ -79,7 +79,8 @@ export function useGraph(width, height) {
       node.isSelected = false;
     } else {
       // Not selected, try to add
-      if (selectedNodeIds.value.length < 5) {
+      const limit = parseInt(localStorage.getItem('max_selection_count') || 5);
+      if (selectedNodeIds.value.length < limit) {
         selectedNodeIds.value.push(nodeId);
         node.isSelected = true;
       } else {
@@ -87,7 +88,7 @@ export function useGraph(width, height) {
         // For better UX, we could replace the first one? 
         // User request: "max 5 multi-select limit". 
         // We'll strict limit for now.
-        console.warn("Max selection reached (5)");
+        console.warn(`Max selection reached (${limit})`);
       }
     }
   };
@@ -109,6 +110,35 @@ export function useGraph(width, height) {
   const clearSelection = () => {
     nodes.value.forEach(n => n.isSelected = false);
     selectedNodeIds.value = [];
+  };
+
+  const removeNodes = (nodeIds) => {
+    if (!nodeIds || nodeIds.length === 0) return;
+    
+    // Remove nodes
+    nodes.value = nodes.value.filter(n => !nodeIds.includes(n.id));
+    
+    // Remove connected links
+    links.value = links.value.filter(l => {
+      const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+      const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+      return !nodeIds.includes(sourceId) && !nodeIds.includes(targetId);
+    });
+
+    // Clean up selection
+    selectedNodeIds.value = selectedNodeIds.value.filter(id => !nodeIds.includes(id));
+    
+    restartSimulation();
+  };
+
+  const updateNodeText = (nodeId, newText) => {
+    const node = nodes.value.find(n => n.id === nodeId);
+    if (node) {
+      node.text = newText;
+      // Also clear translation if text changes, or keep it?
+      // Better clear it as it might not match.
+      node.translation = ''; 
+    }
   };
 
   const getGraphData = () => {
@@ -167,6 +197,8 @@ export function useGraph(width, height) {
     simulation,
     clearGraph,
     clearSelection,
+    removeNodes,
+    updateNodeText,
     getGraphData,
     dragStarted,
     dragged,

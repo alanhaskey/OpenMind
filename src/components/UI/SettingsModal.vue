@@ -12,6 +12,8 @@ const deepseekKey = ref('');
 const localBaseUrl = ref('http://localhost:11434/v1');
 const localModelName = ref('qwen2.5');
 const localApiKey = ref('');
+const maxSelectionCount = ref(5);
+const generateCount = ref(6);
 
 onMounted(() => {
   provider.value = localStorage.getItem('llm_provider') || 'gemini';
@@ -20,6 +22,8 @@ onMounted(() => {
   localBaseUrl.value = localStorage.getItem('local_base_url') || 'http://localhost:11434/v1';
   localModelName.value = localStorage.getItem('local_model_name') || 'qwen2.5';
   localApiKey.value = localStorage.getItem('local_api_key') || '';
+  maxSelectionCount.value = parseInt(localStorage.getItem('max_selection_count') || 6);
+  generateCount.value = parseInt(localStorage.getItem('generate_count') || 6);
 });
 
 const handleSave = () => {
@@ -29,6 +33,8 @@ const handleSave = () => {
   localStorage.setItem('local_base_url', localBaseUrl.value.trim());
   localStorage.setItem('local_model_name', localModelName.value.trim());
   localStorage.setItem('local_api_key', localApiKey.value.trim());
+  localStorage.setItem('max_selection_count', maxSelectionCount.value);
+  localStorage.setItem('generate_count', generateCount.value);
   emit('save');
   emit('close');
 };
@@ -38,8 +44,22 @@ const handleSave = () => {
   <Transition name="fade">
     <div v-if="show" class="modal-overlay" @click="$emit('close')">
       <div class="modal glass" @click.stop>
-        <h3>模型设置</h3>
+        <h3>设置</h3>
         
+        <div class="field">
+          <label>多选上限 (Nodes)</label>
+          <div class="input-wrapper glass-inset">
+             <input v-model.number="maxSelectionCount" type="number" min="1" placeholder="默认 5" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>生成关键词数量 (Max 10)</label>
+          <div class="input-wrapper glass-inset">
+             <input v-model.number="generateCount" type="number" min="1" max="10" placeholder="默认 6" />
+          </div>
+        </div>
+
         <div class="field">
           <label>AI 供应商</label>
           <div class="input-wrapper glass-inset">

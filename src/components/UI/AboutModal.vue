@@ -22,8 +22,12 @@ const emit = defineEmits(['close']);
             <span class="value">alanhaskey2013@qq.com</span>
           </div>
           <div class="row">
+            <span class="label">GitHub</span>
+            <a class="value" href="https://github.com/alanhaskey/OpenMind">alanhaskey | OpenMind</a>
+          </div>
+          <div class="row">
             <span class="label">当前版本</span>
-            <span class="value">v1.0.0</span>
+            <span class="value">v1.0.1</span>
           </div>
         </div>
 
