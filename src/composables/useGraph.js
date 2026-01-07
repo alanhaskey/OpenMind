@@ -79,14 +79,14 @@ export function useGraph(width, height) {
       node.isSelected = false;
     } else {
       // Not selected, try to add
-      const limit = parseInt(localStorage.getItem('max_selection_count') || 5);
+      const limit = parseInt(localStorage.getItem('max_selection_count') || 6);
       if (selectedNodeIds.value.length < limit) {
         selectedNodeIds.value.push(nodeId);
         node.isSelected = true;
       } else {
-        // Optional: Alert user or ignore? User said "Max 5".
+        // Optional: Alert user or ignore? User said "Max 6".
         // For better UX, we could replace the first one? 
-        // User request: "max 5 multi-select limit". 
+        // User request: "max 6 multi-select limit". 
         // We'll strict limit for now.
         console.warn(`Max selection reached (${limit})`);
       }

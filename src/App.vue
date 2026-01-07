@@ -125,9 +125,7 @@ const handleNodeClick = async (node) => {
       e.message.includes("Missing") &&
       e.message.includes("Key")
     ) {
-      showToastMessage("未配置 API Key，请在设置中配置", "warning"); // "Missing API Key, please configure in settings"
-      // Optionally open settings?
-      // showSettingsModal.value = true;
+      showToastMessage("未配置 API Key，请在设置中配置", "warning");
     } else {
       showToastMessage("生成失败，请重试", "error");
     }

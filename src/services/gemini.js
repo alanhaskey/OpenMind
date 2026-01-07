@@ -1,21 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Fallback mock service
-async function getRelatedWordsMock(word, count) {
-  await new Promise(resolve => setTimeout(resolve, 800));
-  const mocks = [
-    { word: '想法'},
-    { word: '概念'},
-    { word: '设计'},
-    { word: '创新'},
-    { word: '艺术'},
-    { word: '未来'},
-    { word: '混沌'},
-    { word: '秩序'},
-  ];
-  return mocks.sort(() => 0.5 - Math.random()).slice(0, count);
-}
-
 // Helper to construct prompt with context
 const createPrompt = (word, count, context, themes = [], strictMode = false, language = '中文') => {
   let contextStr = "";
@@ -144,13 +128,6 @@ export async function getRelatedWords(word, count = 6, context = [], themes = []
     }
   } catch (error) {
     console.error(`${provider} API Error:`, error);
-    
-    // If it's a configuration error (Missing Key), re-throw it so UI can show a warning.
-    if (error.message && error.message.includes('Missing') && error.message.includes('Key')) {
-      throw error;
-    }
-
-    // Fallback to mock
-    return getRelatedWordsMock(word, count);
+    throw error;
   }
 }
