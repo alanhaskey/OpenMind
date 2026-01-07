@@ -4,6 +4,7 @@ defineProps({
 });
 
 const emit = defineEmits(["close"]);
+const version = __APP_VERSION__;
 </script>
 
 <template>
@@ -32,7 +33,7 @@ const emit = defineEmits(["close"]);
           </div>
           <div class="row">
             <span class="label">当前版本</span>
-            <span class="value">v1.0.3</span>
+            <span class="value">v{{ version }}</span>
           </div>
         </div>
 
