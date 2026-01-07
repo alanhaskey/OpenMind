@@ -97,7 +97,7 @@ watch(
 .language-selector {
   position: absolute;
   top: 30px;
-  right: 180px;
+  right: 140px;
   border-radius: 20px;
   z-index: 100;
   user-select: none;
