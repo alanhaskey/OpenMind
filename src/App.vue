@@ -15,6 +15,7 @@ import Toast from "./components/UI/Toast.vue"; // New Import
 import { getRelatedWords } from "./services/gemini";
 
 const graphRef = ref(null);
+const inputBarRef = ref(null);
 const hasStarted = ref(false);
 const showResetModal = ref(false);
 const showSettingsModal = ref(false);
@@ -106,7 +107,6 @@ const handleNodeClick = async (node) => {
 
     if (related && Array.isArray(related)) {
       related.forEach((item) => {
-        // New format: only 'word' field, no translation
         graphRef.value.addNode(item.word, "", node.id);
       });
       node.expanded = true;
@@ -247,6 +247,12 @@ const handleKeydown = (e) => {
   if (e.key.toLowerCase() === "l") {
     strictMode.value = !strictMode.value;
   }
+  if (e.key.toLowerCase() === "tab") {
+    e.preventDefault();
+    if (inputBarRef.value) {
+      inputBarRef.value.focus();
+    }
+  }
 };
 
 onMounted(() => {
@@ -277,7 +283,11 @@ onUnmounted(() => {
       @node-contextmenu="handleNodeContextmenu"
     />
 
-    <InputBar :has-started="hasStarted" @submit="handleInputSubmit" />
+    <InputBar
+      ref="inputBarRef"
+      :has-started="hasStarted"
+      @submit="handleInputSubmit"
+    />
 
     <ControlPanel
       @reset="onResetRequest"

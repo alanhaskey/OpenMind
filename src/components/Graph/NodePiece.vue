@@ -8,12 +8,14 @@ const props = defineProps({
   },
   isLoading: Boolean,
   isLastSelected: Boolean,
+  expanded: Boolean,
 });
 
 const emit = defineEmits(["click", "contextmenu"]);
 
 const isSelected = computed(() => props.node.isSelected);
 const isCenter = computed(() => props.node.isCenter);
+const expanded = computed(() => props.node.expanded);
 
 const style = computed(() => ({
   transform: `translate(${props.node.x}px, ${props.node.y}px)`,
@@ -31,6 +33,7 @@ const style = computed(() => ({
       'last-selected': isLastSelected,
       center: isCenter,
       loading: isLoading,
+      expanded: expanded && !isCenter,
     }"
     :style="style"
     @click.stop="emit('click', node)"
@@ -67,6 +70,10 @@ const style = computed(() => ({
   border-color: var(--color-primary);
   margin-left: -60px;
   margin-top: -60px;
+}
+
+.node.expanded {
+  border-color: var(--color-primary);
 }
 
 .node.selected {

@@ -163,6 +163,7 @@ const isNodeLastSelected = (node) => {
           :key="node.id"
           :node="node"
           :isLoading="node.isLoading"
+          :expanded="node.expanded"
           :is-last-selected="isNodeLastSelected(node)"
           v-draggable="node"
           @click="(n) => emit('node-click', n)"

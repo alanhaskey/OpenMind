@@ -7,6 +7,7 @@ const props = defineProps({
 
 const emit = defineEmits(["submit"]);
 const inputValue = ref("");
+const inputRef = ref(null);
 
 // Dynamic placeholder functionality
 const placeholderTexts = [
@@ -62,12 +63,23 @@ onUnmounted(() => {
     clearInterval(placeholderInterval);
   }
 });
+
+const focus = () => {
+  if (inputRef.value) {
+    inputRef.value.focus();
+  }
+};
+
+defineExpose({
+  focus,
+});
 </script>
 
 <template>
   <div class="input-container" :class="{ 'at-bottom': hasStarted }">
     <div class="input-wrapper glass">
       <input
+        ref="inputRef"
         v-model="inputValue"
         type="text"
         :placeholder="currentPlaceholder"
