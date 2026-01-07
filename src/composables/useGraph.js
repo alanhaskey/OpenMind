@@ -143,8 +143,10 @@ export function useGraph(width, height) {
 
   const getGraphData = () => {
     // Human-readable format for "Management View"
-    const center = nodes.value.find(n => n.isCenter);
-    const theme = center ? `${center.text} (${center.translation || 'Center'})` : 'Brainstorming Session';
+    const centers = nodes.value.filter(n => n.isCenter);
+    const themes = centers.length > 0 
+      ? centers.map(c => c.text).join(', ')
+      : 'Brainstorming Session';
     
     // Map connections to readable strings: "Source -> Target"
     const connections = links.value.map(l => {
@@ -154,15 +156,15 @@ export function useGraph(width, height) {
       const targetNode = typeof l.target === 'object' ? l.target : nodes.value.find(n => n.id === l.target);
       
       const sourceName = sourceNode ? sourceNode.text : 'Unknown';
-      const targetName = targetNode ? `${targetNode.text} (${targetNode.translation})` : 'Unknown';
+      const targetName = targetNode ? targetNode.text : 'Unknown';
       
       return `${sourceName} -> ${targetName}`;
     });
 
     return {
-      "主题 (Theme)": theme,
+      "主题 (Theme)": themes,
       "关联脉络 (Associations)": connections,
-      "节点列表 (All Concepts)": nodes.value.map(n => `${n.text} ${n.translation ? '('+n.translation+')' : ''}`)
+      "节点列表 (All Concepts)": nodes.value.map(n => n.text)
     };
   };
 

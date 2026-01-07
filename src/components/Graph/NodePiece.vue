@@ -7,10 +7,6 @@ const props = defineProps({
     required: true,
   },
   isLoading: Boolean,
-  showTranslation: {
-    type: Boolean,
-    default: true
-  },
   isLastSelected: Boolean,
 });
 
@@ -25,32 +21,23 @@ const style = computed(() => ({
   height: isCenter.value ? "120px" : isSelected.value ? "100px" : "80px",
   zIndex: isSelected.value || isCenter.value ? 10 : 1,
 }));
-
-// Logic:
-// If showEnglish is TRUE: Main = Text (Eng), Sub = Translation (CN)
-// If showEnglish is FALSE: Main = Translation (CN) or Text (Fallback), Sub = Hidden
-const mainText = computed(() => {
-  if (props.showEnglish) return props.node.text;
-  return props.node.translation || props.node.text;
-});
-
-const subText = computed(() => {
-  if (props.showEnglish) return props.node.translation || "";
-  return ""; // Hide subtitle if English is hidden (assume Chinese is main)
-});
 </script>
 
 <template>
   <div
     class="node glass"
-    :class="{ selected: isSelected, 'last-selected': isLastSelected, center: isCenter, loading: isLoading }"
+    :class="{
+      selected: isSelected,
+      'last-selected': isLastSelected,
+      center: isCenter,
+      loading: isLoading,
+    }"
     :style="style"
     @click.stop="emit('click', node)"
     @contextmenu.prevent="emit('contextmenu', node)"
   >
     <div class="content">
       <span class="text">{{ node.text }}</span>
-      <span class="translation" v-if="showTranslation && node.translation">{{ node.translation }}</span>
     </div>
     <div v-if="isLoading" class="spinner"></div>
   </div>
@@ -91,7 +78,7 @@ const subText = computed(() => {
 
 /* User Req: Last selected is Blue */
 .node.last-selected {
-  border-color: #00BFFF; /* Deep Sky Blue */
+  border-color: #00bfff; /* Deep Sky Blue */
   box-shadow: 0 0 25px rgba(0, 191, 255, 0.5), var(--glass-shadow);
   background: rgba(0, 191, 255, 0.05);
 }
@@ -105,16 +92,33 @@ const subText = computed(() => {
   border-radius: 50%;
   pointer-events: none;
   /* Glowing rotating border effect */
-  background: conic-gradient(from 0deg, transparent 0%, transparent 60%, #FFA500 100%);
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    transparent 60%,
+    #ffa500 100%
+  );
   animation: rotate 1.5s linear infinite;
   /* Mask to create a border ring */
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), black calc(100% - 2px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), black calc(100% - 2px));
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 2px),
+    black calc(100% - 2px)
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 2px),
+    black calc(100% - 2px)
+  );
 }
 
 @keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .content {
@@ -134,12 +138,5 @@ const subText = computed(() => {
   line-height: 1.2;
   word-break: break-word;
   color: var(--color-text);
-}
-
-.translation {
-  font-size: 10px;
-  color: var(--color-secondary-text);
-  margin-top: 4px;
-  line-height: 1.1;
 }
 </style>

@@ -1,24 +1,35 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue';
-import * as d3 from 'd3';
-import { useGraph } from '../../composables/useGraph';
-import NodePiece from './NodePiece.vue';
+import { ref, onMounted, onUnmounted, watch } from "vue";
+import * as d3 from "d3";
+import { useGraph } from "../../composables/useGraph";
+import NodePiece from "./NodePiece.vue";
 
-const props = defineProps({
-  showTranslation: {
-    type: Boolean,
-    default: true
-  }
-});
+const props = defineProps({});
 
-const emit = defineEmits(['node-click', 'node-contextmenu']);
+const emit = defineEmits(["node-click", "node-contextmenu"]);
 
 const container = ref(null);
 const width = ref(window.innerWidth);
 const height = ref(window.innerHeight);
-const transformStyle = ref({ transform: 'translate(0,0) scale(1)' });
+const transformStyle = ref({ transform: "translate(0,0) scale(1)" });
 
-const { nodes, links, initSimulation, updateDimensions, addNode, toggleSelection, selectedNodeIds, clearGraph, clearSelection, removeNodes, updateNodeText, getGraphData, dragStarted, dragged, dragEnded } = useGraph(width.value, height.value);
+const {
+  nodes,
+  links,
+  initSimulation,
+  updateDimensions,
+  addNode,
+  toggleSelection,
+  selectedNodeIds,
+  clearGraph,
+  clearSelection,
+  removeNodes,
+  updateNodeText,
+  getGraphData,
+  dragStarted,
+  dragged,
+  dragEnded,
+} = useGraph(width.value, height.value);
 
 const handleResize = () => {
   width.value = window.innerWidth;
@@ -26,25 +37,55 @@ const handleResize = () => {
   updateDimensions(width.value, height.value);
 };
 
+const zoomBehavior = ref(null);
+
 const initZoom = () => {
   if (!container.value) return;
 
-  const zoom = d3.zoom()
+  const zoom = d3
+    .zoom()
     .scaleExtent([0.1, 4])
-    .on('zoom', (event) => {
+    .on("zoom", (event) => {
       const { x, y, k } = event.transform;
       transformStyle.value = {
         transform: `translate(${x}px, ${y}px) scale(${k})`,
-        transformOrigin: '0 0'
+        transformOrigin: "0 0",
       };
     })
     // Filter out drag events on nodes to prevent zoom while dragging
     .filter((event) => {
       // If target is inside a node, ignore zoom drag
-      return !event.target.closest('.node');
+      return !event.target.closest(".node");
     });
 
+  zoomBehavior.value = zoom;
   d3.select(container.value).call(zoom);
+};
+
+// Pan to center a node smoothly
+const panToNode = (node) => {
+  if (!container.value || !zoomBehavior.value) return;
+
+  const containerWidth = width.value;
+  const containerHeight = height.value;
+
+  // Calculate the transform needed to center the node
+  const currentTransform = d3.zoomTransform(container.value);
+  const scale = currentTransform.k;
+
+  // Target position: center of viewport
+  const targetX = containerWidth / 2 - node.x * scale;
+  const targetY = containerHeight / 2 - node.y * scale;
+
+  // Animate to the new position
+  d3.select(container.value)
+    .transition()
+    .duration(1000)
+    .ease(d3.easeCubicInOut)
+    .call(
+      zoomBehavior.value.transform,
+      d3.zoomIdentity.translate(targetX, targetY).scale(scale)
+    );
 };
 
 // Directive for Draggable Nodes
@@ -52,23 +93,24 @@ const vDraggable = {
   mounted(el, binding) {
     const node = binding.value;
     d3.select(el).call(
-      d3.drag()
+      d3
+        .drag()
         .subject(() => node)
-        .on('start', (event) => dragStarted(event, node))
-        .on('drag', (event) => dragged(event, node))
-        .on('end', (event) => dragEnded(event, node))
+        .on("start", (event) => dragStarted(event, node))
+        .on("drag", (event) => dragged(event, node))
+        .on("end", (event) => dragEnded(event, node))
     );
-  }
+  },
 };
 
 onMounted(() => {
-  window.addEventListener('resize', handleResize);
+  window.addEventListener("resize", handleResize);
   initSimulation(width.value, height.value);
   initZoom();
 });
 
 onUnmounted(() => {
-  window.removeEventListener('resize', handleResize);
+  window.removeEventListener("resize", handleResize);
 });
 
 defineExpose({
@@ -81,6 +123,7 @@ defineExpose({
   removeNodes,
   updateNodeText,
   getGraphData,
+  panToNode,
 });
 
 // Helper for line coordinates
@@ -105,7 +148,7 @@ const isNodeLastSelected = (node) => {
       <svg class="graph-svg">
         <line
           v-for="link in links"
-          :key="link.id || (link.source.id + '-' + link.target.id)"
+          :key="link.id || link.source.id + '-' + link.target.id"
           :x1="link.source.x"
           :y1="link.source.y"
           :x2="link.target.x"
@@ -120,7 +163,6 @@ const isNodeLastSelected = (node) => {
           :key="node.id"
           :node="node"
           :isLoading="node.isLoading"
-          :show-translation="showTranslation"
           :is-last-selected="isNodeLastSelected(node)"
           v-draggable="node"
           @click="(n) => emit('node-click', n)"

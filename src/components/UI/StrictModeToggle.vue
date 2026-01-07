@@ -2,19 +2,23 @@
 defineProps({
   modelValue: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(["update:modelValue"]);
 
 const toggle = () => {
-  emit('update:modelValue', !modelValue);
+  emit("update:modelValue", !modelValue);
 };
 </script>
 
 <template>
-  <div class="strict-mode-toggle glass" @click="$emit('update:modelValue', !modelValue)" :title="modelValue ? '主题严格模式：已开启' : '主题严格模式：已关闭'">
+  <div
+    class="strict-mode-toggle glass"
+    @click="$emit('update:modelValue', !modelValue)"
+    :title="modelValue ? '主题限定模式：已开启' : '主题限定模式：已关闭'"
+  >
     <div class="toggle-track" :class="{ active: modelValue }">
       <div class="toggle-thumb"></div>
     </div>
@@ -66,8 +70,8 @@ const toggle = () => {
   position: absolute;
   top: 2px;
   left: 2px;
-  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .toggle-track.active .toggle-thumb {

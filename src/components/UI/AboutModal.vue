@@ -3,7 +3,7 @@ defineProps({
   show: Boolean,
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(["close"]);
 </script>
 
 <template>
@@ -11,7 +11,7 @@ const emit = defineEmits(['close']);
     <div v-if="show" class="modal-overlay" @click="$emit('close')">
       <div class="modal glass" @click.stop>
         <h3>关于 OpenMind</h3>
-        
+
         <div class="info-section">
           <div class="row">
             <span class="label">开发者</span>
@@ -23,11 +23,16 @@ const emit = defineEmits(['close']);
           </div>
           <div class="row">
             <span class="label">GitHub</span>
-            <a class="value" href="https://github.com/alanhaskey/OpenMind" target="_blank">alanhaskey | OpenMind</a>
+            <a
+              class="value"
+              href="https://github.com/alanhaskey/OpenMind"
+              target="_blank"
+              >alanhaskey | OpenMind</a
+            >
           </div>
           <div class="row">
             <span class="label">当前版本</span>
-            <span class="value">v1.0.2</span>
+            <span class="value">v1.0.3</span>
           </div>
         </div>
 
@@ -60,7 +65,7 @@ const emit = defineEmits(['close']);
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.95);
   text-align: center;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
 h3 {
@@ -75,7 +80,7 @@ h3 {
   gap: 12px;
   margin-bottom: 24px;
   text-align: left;
-  background: rgba(0,0,0,0.02);
+  background: rgba(0, 0, 0, 0.02);
   padding: 16px;
   border-radius: 12px;
 }
