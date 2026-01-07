@@ -226,6 +226,7 @@ const saveNodeEdit = (newText) => {
 // Keyboard Shortcuts
 const handleKeydown = (e) => {
   // Ignore if typing in input fields
+
   if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
 
   if (e.key.toLowerCase() === "d") {
@@ -233,6 +234,18 @@ const handleKeydown = (e) => {
   }
   if (e.key.toLowerCase() === "e") {
     handleEditSelected();
+  }
+  if (e.key.toLowerCase() === "f") {
+    onFullscreenRequest();
+  }
+  if (e.key.toLowerCase() === "s") {
+    onSettingsRequest();
+  }
+  if (e.key.toLowerCase() === "r") {
+    onResetRequest();
+  }
+  if (e.key.toLowerCase() === "l") {
+    strictMode.value = !strictMode.value;
   }
 };
 

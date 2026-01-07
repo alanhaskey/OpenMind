@@ -17,7 +17,9 @@ const toggle = () => {
   <div
     class="strict-mode-toggle glass"
     @click="$emit('update:modelValue', !modelValue)"
-    :title="modelValue ? '主题限定模式：已开启' : '主题限定模式：已关闭'"
+    :title="
+      modelValue ? '主题限定模式：已开启 (L)' : '主题限定模式：已关闭 (L)'
+    "
   >
     <div class="toggle-track" :class="{ active: modelValue }">
       <div class="toggle-thumb"></div>

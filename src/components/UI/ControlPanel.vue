@@ -6,7 +6,7 @@ const emit = defineEmits(["reset", "export", "settings", "fullscreen"]);
 
 <template>
   <div class="control-panel glass">
-    <button class="btn" @click="$emit('fullscreen')" title="全屏">
+    <button class="btn" @click="$emit('fullscreen')" title="全屏 (F)">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="20"
@@ -24,7 +24,7 @@ const emit = defineEmits(["reset", "export", "settings", "fullscreen"]);
         <polyline points="9 21 3 21 3 15"></polyline>
       </svg>
     </button>
-    <button class="btn" @click="$emit('reset')" title="重置画布">
+    <button class="btn" @click="$emit('reset')" title="重置画布 (R)">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="20"
@@ -59,7 +59,7 @@ const emit = defineEmits(["reset", "export", "settings", "fullscreen"]);
         <line x1="12" y1="15" x2="12" y2="3"></line>
       </svg>
     </button>
-    <button class="btn" @click="$emit('settings')" title="设置">
+    <button class="btn" @click="$emit('settings')" title="设置 (S)">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="20"
