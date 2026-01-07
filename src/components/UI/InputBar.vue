@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 
 const props = defineProps({
   hasStarted: Boolean, // To trigger move to bottom
@@ -8,11 +8,60 @@ const props = defineProps({
 const emit = defineEmits(["submit"]);
 const inputValue = ref("");
 
+// Dynamic placeholder functionality
+const placeholderTexts = [
+  "头脑风暴一下...",
+  "探索新想法...",
+  "记录你的灵感...",
+  "开始思维导图...",
+  "创意从这里开始...",
+  "让想法自由流动...",
+];
+
+const currentPlaceholder = ref(placeholderTexts[0]);
+let placeholderInterval = null;
+let currentIndex = 0;
+
+// Check if dynamic placeholder is enabled
+const isDynamicPlaceholderEnabled = () => {
+  const setting = localStorage.getItem("use_dynamic_placeholder");
+  return setting === null ? true : setting === "true"; // Default to true
+};
+
+// Start placeholder rotation
+const startPlaceholderRotation = () => {
+  if (!isDynamicPlaceholderEnabled()) {
+    currentPlaceholder.value = placeholderTexts[0];
+    return;
+  }
+
+  placeholderInterval = setInterval(() => {
+    if (!isDynamicPlaceholderEnabled()) {
+      clearInterval(placeholderInterval);
+      currentPlaceholder.value = placeholderTexts[0];
+      return;
+    }
+
+    currentIndex = (currentIndex + 1) % placeholderTexts.length;
+    currentPlaceholder.value = placeholderTexts[currentIndex];
+  }, 3500); // Change every 3.5 seconds
+};
+
 const handleSubmit = () => {
   if (!inputValue.value.trim()) return;
   emit("submit", inputValue.value.trim());
   inputValue.value = "";
 };
+
+onMounted(() => {
+  startPlaceholderRotation();
+});
+
+onUnmounted(() => {
+  if (placeholderInterval) {
+    clearInterval(placeholderInterval);
+  }
+});
 </script>
 
 <template>
@@ -21,7 +70,7 @@ const handleSubmit = () => {
       <input
         v-model="inputValue"
         type="text"
-        placeholder="头脑风暴一下..."
+        :placeholder="currentPlaceholder"
         @keyup.enter="handleSubmit"
         class="input-field"
       />
@@ -73,6 +122,44 @@ const handleSubmit = () => {
   max-width: 90%;
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Rainbow border effect */
+.input-wrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0px;
+  border-radius: 9999px;
+  padding: 2px;
+  background: linear-gradient(
+    90deg,
+    #ff0080,
+    #ff8c00,
+    #ffd700,
+    #00ff00,
+    #00bfff,
+    #8a2be2,
+    #ff0080
+  );
+  background-size: 200% 100%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  animation: rainbow-flow 3s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes rainbow-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
 }
 
 .input-field {
