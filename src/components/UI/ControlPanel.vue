@@ -59,6 +59,35 @@ const emit = defineEmits(["reset", "export", "settings", "fullscreen"]);
         <line x1="12" y1="15" x2="12" y2="3"></line>
       </svg>
     </button>
+    <button class="btn" @click="$emit('themeColor')" title="主题色">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+      >
+        <rect
+          x="2"
+          y="2"
+          width="20"
+          height="20"
+          rx="2"
+          ry="2"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        />
+        <rect
+          x="4"
+          y="4"
+          width="16"
+          height="16"
+          rx="1"
+          ry="1"
+          fill="var(--color-primary)"
+        />
+      </svg>
+    </button>
     <button class="btn" @click="$emit('settings')" title="设置 (S)">
       <svg
         xmlns="http://www.w3.org/2000/svg"

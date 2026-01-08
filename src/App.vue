@@ -194,6 +194,11 @@ const onFullscreenRequest = () => {
   }
 };
 
+// Theme Color Flow
+const onThemeColorRequest = () => {
+  showThemeColorModal.value = true;
+};
+
 // Node Actions
 const handleDeleteSelected = () => {
   if (graphRef.value && hasSelection.value) {
@@ -294,6 +299,7 @@ onUnmounted(() => {
       @settings="onSettingsRequest"
       @export="onExportRequest"
       @fullscreen="onFullscreenRequest"
+      @themeColor="onThemeColorRequest"
     />
 
     <Modal

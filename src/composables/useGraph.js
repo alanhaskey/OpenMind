@@ -10,10 +10,10 @@ export function useGraph(width, height) {
   // Initialize simulation
   const initSimulation = (w, h) => {
     simulation.value = d3.forceSimulation(nodes.value)
-      .force('charge', d3.forceManyBody().strength(-300))
+      .force('charge', d3.forceManyBody().strength(-100))
       .force('center', d3.forceCenter(w / 2, h / 2))
       .force('link', d3.forceLink(links.value).id(d => d.id).distance(100))
-      .force('collide', d3.forceCollide().radius(60).iterations(2))
+      .force('collide', d3.forceCollide().radius(55).iterations(2))
       .on('tick', () => {
         // Trigger reactivity for position updates if needed
       });
