@@ -1,16 +1,25 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from "vue";
+import { ref, onMounted, onUnmounted, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps({
   hasStarted: Boolean, // To trigger move to bottom
+  associationMode: {
+    type: String,
+    default: "related",
+  },
 });
 
-const emit = defineEmits(["submit"]);
+const emit = defineEmits([
+  "submit",
+  "update:associationMode",
+  "request-custom-prompt",
+  "request-document-upload",
+]);
 const inputValue = ref("");
 const inputRef = ref(null);
 
-const { tm } = useI18n();
+const { tm, locale } = useI18n();
 
 // Dynamic placeholder functionality
 const getPlaceholderTexts = () => tm("ui.placeholders") || [];
@@ -18,6 +27,58 @@ const getPlaceholderTexts = () => tm("ui.placeholders") || [];
 const currentPlaceholder = ref(getPlaceholderTexts()[0] || "");
 let placeholderInterval = null;
 let currentIndex = 0;
+
+// Association Modes
+const modes = computed(() => [
+  { value: "related", label: tm("modes.related") },
+  { value: "tree", label: tm("modes.tree") },
+  { value: "creative", label: tm("modes.creative") },
+  { value: "deep", label: tm("modes.deep") },
+  { value: "learning", label: tm("modes.learning") },
+  { value: "document", label: tm("modes.document") },
+  { value: "custom", label: tm("modes.custom") },
+]);
+
+const selectedMode = ref(props.associationMode);
+const showModeMenu = ref(false);
+
+const currentModeLabel = computed(() => {
+  const mode = modes.value.find((m) => m.value === selectedMode.value);
+  return mode ? mode.label : "";
+});
+
+watch(
+  () => props.associationMode,
+  (newVal) => {
+    selectedMode.value = newVal;
+  }
+);
+
+const toggleModeMenu = () => {
+  showModeMenu.value = !showModeMenu.value;
+};
+
+const selectMode = (modeValue) => {
+  selectedMode.value = modeValue;
+  showModeMenu.value = false;
+
+  emit("update:associationMode", selectedMode.value);
+
+  if (selectedMode.value === "custom") {
+    emit("request-custom-prompt");
+  }
+  if (selectedMode.value === "document") {
+    emit("request-document-upload");
+  }
+};
+
+// Close menu when clicking outside
+const modeSelectorRef = ref(null);
+const handleClickOutside = (event) => {
+  if (modeSelectorRef.value && !modeSelectorRef.value.contains(event.target)) {
+    showModeMenu.value = false;
+  }
+};
 
 // Check if dynamic placeholder is enabled
 const isDynamicPlaceholderEnabled = () => {
@@ -57,8 +118,6 @@ const handleSubmit = () => {
   inputValue.value = "";
 };
 
-const { locale } = useI18n(); // Destructure locale for watching
-
 watch(locale, () => {
   // When locale changes, reset placeholder immediately to valid one from new language
   const texts = getPlaceholderTexts();
@@ -69,10 +128,12 @@ watch(locale, () => {
 });
 
 onMounted(() => {
+  document.addEventListener("click", handleClickOutside);
   startPlaceholderRotation();
 });
 
 onUnmounted(() => {
+  document.removeEventListener("click", handleClickOutside);
   if (placeholderInterval) {
     clearInterval(placeholderInterval);
   }
@@ -92,6 +153,55 @@ defineExpose({
 <template>
   <div class="input-container" :class="{ 'at-bottom': hasStarted }">
     <div class="input-wrapper glass">
+      <!-- Mode Selector Icon (Only visible if not started) -->
+      <div
+        v-if="!hasStarted"
+        class="mode-selector-wrapper"
+        ref="modeSelectorRef"
+      >
+        <button
+          class="mode-btn"
+          @click="toggleModeMenu"
+          :title="currentModeLabel"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="4" y1="21" x2="4" y2="14"></line>
+            <line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line>
+            <line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="1" y1="14" x2="7" y2="14"></line>
+            <line x1="9" y1="8" x2="15" y2="8"></line>
+            <line x1="17" y1="16" x2="23" y2="16"></line>
+          </svg>
+        </button>
+        <!-- Dropdown Menu -->
+        <Transition name="fade">
+          <div v-if="showModeMenu" class="mode-menu glass">
+            <div
+              v-for="mode in modes"
+              :key="mode.value"
+              class="mode-item"
+              :class="{ active: selectedMode === mode.value }"
+              @click="selectMode(mode.value)"
+            >
+              {{ mode.label }}
+            </div>
+          </div>
+        </Transition>
+      </div>
+
       <input
         ref="inputRef"
         v-model="inputValue"
@@ -131,7 +241,7 @@ defineExpose({
   display: flex;
   justify-content: center;
   z-index: 100;
-  pointer-events: none; /* Let clicks pass through area around input */
+  pointer-events: none;
 }
 
 .input-container.at-bottom {
@@ -144,12 +254,12 @@ defineExpose({
   align-items: center;
   padding: 8px 16px;
   border-radius: 9999px;
-  width: 400px;
+  width: 420px;
   max-width: 90%;
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(20px);
   position: relative;
-  overflow: hidden;
+  /* overflow: hidden; Removed to allow visible dropdown */
 }
 
 /* Rainbow border effect */
@@ -188,6 +298,67 @@ defineExpose({
   }
 }
 
+/* Mode Selector Styles */
+.mode-selector-wrapper {
+  position: relative;
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.mode-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mode-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--color-primary);
+}
+
+.mode-menu {
+  position: absolute;
+  bottom: 140%; /* Opens upwards */
+  left: 0;
+  width: 160px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 8px 0;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  z-index: 200;
+  transform-origin: bottom left;
+}
+
+.mode-item {
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.mode-item:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.mode-item.active {
+  font-weight: 800;
+  text-decoration: underline;
+  background: rgba(var(--color-primary-rgb), 0.1);
+}
+
 .input-field {
   flex: 1;
   border: none;
@@ -208,9 +379,22 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-left: 4px;
 }
 
 .send-btn:hover {
   color: var(--color-text);
+}
+
+/* Transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
 }
 </style>

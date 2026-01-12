@@ -14,7 +14,7 @@ const qwenKey = ref("");
 const localBaseUrl = ref("http://localhost:11434/v1");
 const localModelName = ref("qwen2.5");
 const localApiKey = ref("");
-const maxSelectionCount = ref(5);
+const maxSelectionCount = ref(null); // Changed default to null
 const generateCount = ref(6);
 
 // Reload settings from localStorage whenever modal opens
@@ -32,9 +32,10 @@ watch(
       localModelName.value =
         localStorage.getItem("local_model_name") || "qwen2.5";
       localApiKey.value = localStorage.getItem("local_api_key") || "";
-      maxSelectionCount.value = parseInt(
-        localStorage.getItem("max_selection_count") || 6
-      );
+
+      const storedLimit = localStorage.getItem("max_selection_count");
+      maxSelectionCount.value = storedLimit ? parseInt(storedLimit) : null;
+
       generateCount.value = parseInt(
         localStorage.getItem("generate_count") || 6
       );
@@ -51,7 +52,13 @@ const handleSave = () => {
   localStorage.setItem("local_base_url", localBaseUrl.value.trim());
   localStorage.setItem("local_model_name", localModelName.value.trim());
   localStorage.setItem("local_api_key", localApiKey.value.trim());
-  localStorage.setItem("max_selection_count", maxSelectionCount.value);
+
+  if (maxSelectionCount.value) {
+    localStorage.setItem("max_selection_count", maxSelectionCount.value);
+  } else {
+    localStorage.removeItem("max_selection_count"); // Clear if empty
+  }
+
   localStorage.setItem("generate_count", generateCount.value);
   emit("save");
   emit("close");
@@ -71,7 +78,7 @@ const handleSave = () => {
               v-model.number="maxSelectionCount"
               type="number"
               min="1"
-              placeholder="默认 6"
+              :placeholder="$t('modal.settings.maxNodesPlaceholder')"
             />
           </div>
         </div>
@@ -84,7 +91,7 @@ const handleSave = () => {
               type="number"
               min="1"
               max="10"
-              placeholder="默认 6"
+              :placeholder="$t('modal.settings.maxGenPlaceholder')"
             />
           </div>
         </div>

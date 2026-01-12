@@ -47,10 +47,19 @@
       "placeholderOptional": "Optional",
       "maxNodes": "Max Multi-select Nodes",
       "maxGen": "Keywords per Generation",
-      "save": "Save"
+      "save": "Save",
+      "maxNodesPlaceholder": "Optional (default no limit)",
+      "maxGenPlaceholder": "Default 6"
     },
     "edit": {
       "title": "Edit Node",
+      "save": "Save",
+      "cancel": "Cancel",
+      "close": "Close"
+    },
+    "customPrompt": {
+      "title": "Custom Prompt",
+      "placeholder": "Enter your custom prompt template...\n(e.g.：It focuses on metaphors, analogies, and cross-domain associations, not only literal connections but also perceptual synesthesia or leaps in imagery.)",
       "save": "Save",
       "cancel": "Cancel"
     },
@@ -69,7 +78,9 @@
     "importFailParse": "Import failed: Unable to parse file",
     "missingKey": "API Key missing, please configure in Settings",
     "genFail": "Generation failed, please try again",
-    "maxSelection": "Max selection limit reached ({limit})"
+    "maxSelection": "Max selection limit reached ({limit})",
+    "docLoaded": "Document content loaded",
+    "docUnsupported": "Only .txt and .md files are supported"
   },
   "ui": {
     "language": "Language",
@@ -89,5 +100,14 @@
       "delete": "Delete selected nodes (D)",
       "edit": "Edit last selected node (E)"
     }
+  },
+  "modes": {
+    "related": "Related (Default)",
+    "tree": "Tree (Parent-Child)",
+    "creative": "Creative (Analogy)",
+    "deep": "Deep (Philosophy)",
+    "learning": "Learning",
+    "document": "Document Context",
+    "custom": "Custom Prompt"
   }
 }

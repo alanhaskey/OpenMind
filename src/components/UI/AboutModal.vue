@@ -39,7 +39,7 @@ const version = __APP_VERSION__;
 
         <div class="actions">
           <button class="btn confirm" @click="$emit('close')">
-            {{ $t("modal.edit.cancel") }}
+            {{ $t("modal.edit.close") }}
           </button>
         </div>
       </div>

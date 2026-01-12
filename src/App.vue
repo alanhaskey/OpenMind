@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import GraphCanvas from "./components/Graph/GraphCanvas.vue";
 import InputBar from "./components/UI/InputBar.vue";
 import LogoPiece from "./components/UI/LogoPiece.vue";
@@ -11,8 +11,9 @@ import NodeActions from "./components/UI/NodeActions.vue";
 import EditNodeModal from "./components/UI/EditNodeModal.vue";
 import StrictModeToggle from "./components/UI/StrictModeToggle.vue";
 import LanguageSelector from "./components/UI/LanguageSelector.vue";
-import Toast from "./components/UI/Toast.vue"; // New Import
+import Toast from "./components/UI/Toast.vue";
 import ThemeColorModal from "./components/UI/ThemeColorModal.vue";
+import CustomPromptModal from "./components/UI/CustomPromptModal.vue";
 
 import { getRelatedWords } from "./services/aiService";
 import { useI18n } from "vue-i18n";
@@ -27,9 +28,13 @@ const showSettingsModal = ref(false);
 const showAboutModal = ref(false);
 const showEditModal = ref(false);
 const showThemeColorModal = ref(false);
+const showCustomPromptModal = ref(false);
 
 const strictMode = ref(false);
-// const selectedLanguage = ref(...) // Removed, using global i18n
+
+const associationMode = ref("related");
+const customPrompt = ref("");
+const documentContent = ref("");
 
 // Toast State
 const showToast = ref(false);
@@ -54,7 +59,7 @@ const hasSelection = computed(() => {
 });
 
 const canEdit = computed(() => {
-  return hasSelection.value; // Logic: Always can edit if selected, but effective on Last Selected.
+  return hasSelection.value;
 });
 
 const handleInputSubmit = async (text) => {
@@ -62,11 +67,9 @@ const handleInputSubmit = async (text) => {
   hasStarted.value = true;
 
   if (graphRef.value) {
-    // addNode will automatically attach to the last selected node
     const newNode = graphRef.value.addNode(text, "");
     graphRef.value.clearSelection();
 
-    // Auto-center on the new node
     if (newNode) {
       setTimeout(() => {
         graphRef.value.panToNode(newNode);
@@ -82,32 +85,33 @@ const handleNodeClick = async (node) => {
     node.isLoading = true;
 
     // Contextual Brainstorming:
-    // Gather text from other selected nodes (Green/Blue ones) to guide the AI
     let contextWords = [];
     let themes = [];
 
     if (graphRef.value && graphRef.value.nodes) {
       const selectedIds = graphRef.value.selectedNodeIds;
       contextWords = graphRef.value.nodes
-        .filter((n) => selectedIds.includes(n.id) && n.id !== node.id) // Exclude current clicked node
+        .filter((n) => selectedIds.includes(n.id) && n.id !== node.id)
         .map((n) => n.text);
 
-      // Requirements: Yellow nodes are Brainstorming Themes.
-      // Gather all 'center' (yellow) nodes.
       themes = graphRef.value.nodes
         .filter((n) => n.isCenter)
         .map((n) => n.text);
     }
 
-    // Call API with context and themes
     const count = parseInt(localStorage.getItem("generate_count") || 6);
+
+    // Call API with all params including new mode params
     const related = await getRelatedWords(
       node.text,
       count,
       contextWords,
       themes,
       strictMode.value,
-      locale.value === "en" ? "English" : "Chinese" // Pass appropriate string to API
+      locale.value === "en" ? "English" : "Chinese",
+      associationMode.value,
+      customPrompt.value,
+      documentContent.value
     );
 
     if (related && Array.isArray(related)) {
@@ -115,10 +119,8 @@ const handleNodeClick = async (node) => {
         graphRef.value.addNode(item.word, "", node.id);
       });
       node.expanded = true;
-      // Auto-deselect after generating new nodes
       graphRef.value.clearSelection();
 
-      // Auto-center on the parent node after generation
       setTimeout(() => {
         graphRef.value.panToNode(node);
       }, 500);
@@ -154,6 +156,8 @@ const confirmReset = () => {
   if (graphRef.value) {
     graphRef.value.clearGraph();
     hasStarted.value = false;
+    documentContent.value = "";
+    associationMode.value = "related";
   }
   showResetModal.value = false;
 };
@@ -164,8 +168,6 @@ const onSettingsRequest = () => {
 };
 
 const handleSettingsSave = () => {
-  // Key saved in component to localStorage.
-  // We don't need to do anything else, next call will read it.
   showSettingsModal.value = false;
 };
 
@@ -221,6 +223,44 @@ const handleFileChange = (event) => {
   reader.readAsText(file);
 };
 
+// Start Document Upload
+const docInputRef = ref(null);
+
+const onRequestDocumentUpload = () => {
+  if (docInputRef.value) {
+    docInputRef.value.value = "";
+    docInputRef.value.click();
+  }
+};
+
+const handleDocFileChange = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (file.name.endsWith(".txt") || file.name.endsWith(".md")) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      documentContent.value = e.target.result;
+      showToastMessage(t("toast.docLoaded"), "success");
+    };
+    reader.readAsText(file);
+  } else {
+    // Fallback or warning for PDF/Docx
+    showToastMessage(t("toast.docUnsupported"), "warning");
+  }
+};
+// End Document Upload
+
+// Custom Prompt Flow
+const onRequestCustomPrompt = () => {
+  showCustomPromptModal.value = true;
+};
+
+const saveCustomPrompt = (prompt) => {
+  customPrompt.value = prompt;
+  showCustomPromptModal.value = false;
+};
+
 // Fullscreen Flow
 const onFullscreenRequest = () => {
   if (!document.fullscreenElement) {
@@ -249,7 +289,6 @@ const handleDeleteSelected = () => {
 const handleEditSelected = () => {
   if (!graphRef.value || !hasSelection.value) return;
 
-  // Edit the *Last Selected* node (Blue)
   const ids = graphRef.value.selectedNodeIds;
   const lastId = ids[ids.length - 1];
   const node = graphRef.value.nodes.find((n) => n.id === lastId);
@@ -270,8 +309,6 @@ const saveNodeEdit = (newText) => {
 
 // Keyboard Shortcuts
 const handleKeydown = (e) => {
-  // Ignore if typing in input fields
-
   if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
 
   if (e.key.toLowerCase() === "d") {
@@ -300,10 +337,30 @@ const handleKeydown = (e) => {
   }
 };
 
+// Dynamic Title Logic
+watch(
+  [() => graphRef.value?.nodes, associationMode, locale],
+  ([newNodes, newMode]) => {
+    if (!newNodes || newNodes.length === 0) {
+      document.title = "OpenMind";
+      return;
+    }
+
+    const centers = newNodes.filter((n) => n.isCenter);
+    if (centers.length > 0) {
+      const titles = centers.map((n) => n.text).join(", ");
+      const modeLabel = t(`modes.${newMode}`) || newMode;
+      document.title = `[${titles}] - ${modeLabel}`;
+    } else {
+      document.title = "OpenMind";
+    }
+  },
+  { deep: true }
+);
+
 onMounted(() => {
   window.addEventListener("keydown", handleKeydown);
 
-  // Initialize Theme Color
   const storedColor = localStorage.getItem("theme_color");
   if (storedColor) {
     document.documentElement.style.setProperty("--color-primary", storedColor);
@@ -328,12 +385,22 @@ onUnmounted(() => {
       @close="showToast = false"
     />
 
+    <!-- Graph State Import -->
     <input
       type="file"
       ref="fileInputRef"
       accept=".json"
       style="display: none"
       @change="handleFileChange"
+    />
+
+    <!-- Document Content Import -->
+    <input
+      type="file"
+      ref="docInputRef"
+      accept=".txt,.md"
+      style="display: none"
+      @change="handleDocFileChange"
     />
 
     <GraphCanvas
@@ -345,7 +412,10 @@ onUnmounted(() => {
     <InputBar
       ref="inputBarRef"
       :has-started="hasStarted"
+      v-model:associationMode="associationMode"
       @submit="handleInputSubmit"
+      @request-custom-prompt="onRequestCustomPrompt"
+      @request-document-upload="onRequestDocumentUpload"
     />
 
     <ControlPanel
@@ -385,6 +455,13 @@ onUnmounted(() => {
       :initial-text="editingNodeText"
       @close="showEditModal = false"
       @save="saveNodeEdit"
+    />
+
+    <CustomPromptModal
+      :show="showCustomPromptModal"
+      :initial-prompt="customPrompt"
+      @close="showCustomPromptModal = false"
+      @save="saveCustomPrompt"
     />
 
     <ThemeColorModal

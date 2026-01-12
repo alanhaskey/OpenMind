@@ -29,8 +29,8 @@
       "provider": "AI 供应商",
       "providerGemini": "Google Gemini",
       "providerDeepSeek": "DeepSeek",
-      "providerKimi": "Kimi (Moonshot)",
-      "providerQwen": "通义千问 (Qwen)",
+      "providerKimi": "Kimi",
+      "providerQwen": "Qwen",
       "providerLocal": "本地 / 自定义 (OpenAI 兼容)",
       "deepseekKey": "DeepSeek API Key",
       "kimiKey": "Moonshot API Key",
@@ -41,16 +41,25 @@
       "hintQwen": "从阿里云百炼 (DashScope) 获取 key",
       "apiUrl": "API 地址",
       "modelName": "模型名称",
-      "localKey": "API Key (可选)",
+      "localKey": "API Key",
       "placeholderUrl": "例如 http://localhost:11434/v1",
       "placeholderModel": "例如 qwen2.5",
       "placeholderOptional": "可选",
       "maxNodes": "最大多选节点数",
       "maxGen": "单次生成关键词数",
-      "save": "保存"
+      "save": "保存",
+      "maxNodesPlaceholder": "可选（默认无限制）",
+      "maxGenPlaceholder": "默认 6"
     },
     "edit": {
       "title": "编辑节点",
+      "save": "保存",
+      "cancel": "取消",
+      "close": "关闭"
+    },
+    "customPrompt": {
+      "title": "自定义联想提示词",
+      "placeholder": "请输入你的自定义提示词模板...\n(例如：侧重于隐喻、类比、跨界联想，不仅是字面相关，更是意象上的通感或跳跃。)",
       "save": "保存",
       "cancel": "取消"
     },
@@ -69,7 +78,9 @@
     "importFailParse": "导入失败：无法解析文件",
     "missingKey": "未配置 API Key，请在设置中配置",
     "genFail": "生成失败，请重试",
-    "maxSelection": "已达到最大选择数量 ({limit})"
+    "maxSelection": "已达到最大选择数量 ({limit})",
+    "docLoaded": "文档内容已加载",
+    "docUnsupported": "目前仅支持 .txt 和 .md 文本文件"
   },
   "ui": {
     "language": "语言",
@@ -89,5 +100,14 @@
       "delete": "删除选中节点 (D)",
       "edit": "编辑最后选中节点 (E)"
     }
+  },
+  "modes": {
+    "related": "默认",
+    "tree": "父子联想",
+    "creative": "创意联想",
+    "deep": "深度联想",
+    "learning": "学习联想",
+    "document": "文档联想",
+    "custom": "自定义联想"
   }
 }
