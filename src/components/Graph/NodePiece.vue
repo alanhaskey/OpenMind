@@ -18,7 +18,8 @@ const isCenter = computed(() => props.node.isCenter);
 const expanded = computed(() => props.node.expanded);
 
 const style = computed(() => ({
-  transform: `translate(${props.node.x}px, ${props.node.y}px)`,
+  "--x": `${props.node.x}px`,
+  "--y": `${props.node.y}px`,
   width: isCenter.value ? "120px" : isSelected.value ? "100px" : "80px",
   height: isCenter.value ? "120px" : isSelected.value ? "100px" : "80px",
   zIndex: isSelected.value || isCenter.value ? 10 : 1,
@@ -57,19 +58,19 @@ const style = computed(() => ({
   justify-content: center;
   text-align: center;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  /* Use CSS variables for position so transitions can scale independently */
+  /* Center the node using translate(-50%, -50%) to handle dynamic size changes automatically */
+  transform: translate(var(--x), var(--y)) translate(-50%, -50%);
+  transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+    height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), background-color 0.4s ease,
+    border-color 0.4s ease, box-shadow 0.4s ease;
   will-change: transform, width, height;
-  /* Centering the node on its coordinate */
-  margin-left: -40px;
-  margin-top: -40px;
   border: 1px solid var(--glass-border);
 }
 
 .node.center {
   background: rgba(255, 255, 0, 0.1); /* Subtle yellow tint */
   border-color: var(--color-primary);
-  margin-left: -60px;
-  margin-top: -60px;
 }
 
 .node.expanded {
@@ -79,8 +80,6 @@ const style = computed(() => ({
 .node.selected {
   border-color: var(--color-selection); /* Green */
   box-shadow: 0 0 20px rgba(57, 255, 20, 0.3), var(--glass-shadow);
-  margin-left: -50px;
-  margin-top: -50px;
 }
 
 /* User Req: Last selected is Blue */

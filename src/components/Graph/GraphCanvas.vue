@@ -162,17 +162,19 @@ const isNodeLastSelected = (node) => {
         />
       </svg>
       <div class="nodes-layer">
-        <NodePiece
-          v-for="node in nodes"
-          :key="node.id"
-          :node="node"
-          :isLoading="node.isLoading"
-          :expanded="node.expanded"
-          :is-last-selected="isNodeLastSelected(node)"
-          v-draggable="node"
-          @click="(n) => emit('node-click', n)"
-          @contextmenu="(n) => emit('node-contextmenu', n)"
-        />
+        <TransitionGroup name="node-pop">
+          <NodePiece
+            v-for="node in nodes"
+            :key="node.id"
+            :node="node"
+            :isLoading="node.isLoading"
+            :expanded="node.expanded"
+            :is-last-selected="isNodeLastSelected(node)"
+            v-draggable="node"
+            @click="(n) => emit('node-click', n)"
+            @contextmenu="(n) => emit('node-contextmenu', n)"
+          />
+        </TransitionGroup>
       </div>
     </div>
   </div>
@@ -225,5 +227,27 @@ const isNodeLastSelected = (node) => {
 
 .nodes-layer > * {
   pointer-events: auto;
+}
+
+/* Node Pop Animation */
+.node-pop-enter-active {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Elastic bounce */
+}
+
+.node-pop-leave-active {
+  transition: all 0.3s ease-in;
+}
+
+.node-pop-enter-from,
+.node-pop-leave-to {
+  opacity: 0;
+  transform: translate(var(--x), var(--y)) translate(-50%, -50%) scale(0);
+}
+
+/* Ensure stable position when not animating (handled by NodePiece, but good to ensure overridden) */
+.node-pop-enter-to,
+.node-pop-leave-from {
+  opacity: 1;
+  transform: translate(var(--x), var(--y)) translate(-50%, -50%) scale(1);
 }
 </style>
