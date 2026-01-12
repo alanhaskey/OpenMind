@@ -84,9 +84,9 @@
   },
   "ui": {
     "language": "语言",
-    "strictMode": "主题限定模式",
-    "strictModeOn": "主题限定模式：已开启 (L)",
-    "strictModeOff": "主题限定模式：已关闭 (L)",
+    "strictMode": "链接桥模式",
+    "strictModeOn": "链接桥模式：已开启 (L)",
+    "strictModeOff": "链接桥模式：已关闭 (L)",
     "inputPlaceholder": "输入一个核心概念...",
     "placeholders": [
       "头脑风暴一下...",

@@ -97,6 +97,37 @@ const handleNodeClick = async (node) => {
       themes = graphRef.value.nodes
         .filter((n) => n.isCenter)
         .map((n) => n.text);
+
+      if (strictMode.value) {
+        // Link Bridge Mode: Trace path back from current node to root
+        themes = []; // Reset themes to build path
+        let current = node;
+        themes.push(current.text);
+
+        const allLinks = graphRef.value.links || [];
+        const allNodes = graphRef.value.nodes || [];
+        
+        // Trace back up to 20 levels
+        for (let i = 0; i < 20; i++) {
+          const parentLink = allLinks.find(l => {
+            const tId = (typeof l.target === 'object') ? l.target.id : l.target;
+            return tId === current.id;
+          });
+
+          if (parentLink) {
+             const sId = (typeof parentLink.source === 'object') ? parentLink.source.id : parentLink.source;
+             const parent = allNodes.find(n => n.id === sId);
+             if (parent) {
+               themes.unshift(parent.text);
+               current = parent;
+             } else {
+               break;
+             }
+          } else {
+            break;
+          }
+        }
+      }
     }
 
     const count = parseInt(localStorage.getItem("generate_count") || 6);

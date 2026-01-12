@@ -128,6 +128,7 @@ defineExpose({
   panToNode,
   exportGraphState,
   importGraphState,
+  links,
 });
 
 // Helper for line coordinates

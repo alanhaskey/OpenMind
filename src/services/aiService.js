@@ -8,8 +8,9 @@ const createPrompt = (word, count, context, themes = [], strictMode = false, lan
   }
   
   if (themes && themes.length > 0 && strictMode) {
-    contextStr += `\n头脑风暴主题 (Brainstorming Themes)：[${themes.join(', ')}]`;
-    contextStr += `\n‼ 重要限制：你必须严格围绕上述"头脑风暴主题"进行发散。生成的联想词必须体现这些主题的核心概念，不得偏离主题。`;
+    const pathStr = themes.join(' -> ');
+    contextStr += `\n当前思维路径 (Thinking Path): ${pathStr}`;
+    contextStr += `\n‼ 链接桥模式 (Link Bridge Mode)：生成的联想词必须作为上述思维路径 [${pathStr}] 的延续。请结合路径中上级节点的语境，确保新生成的词语与该脉络逻辑一致且层层递进。`;
   }
 
   // Base instruction based on mode

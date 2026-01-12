@@ -84,9 +84,9 @@
   },
   "ui": {
     "language": "Language",
-    "strictMode": "Strict Mode",
-    "strictModeOn": "Strict Mode: ON (L)",
-    "strictModeOff": "Strict Mode: OFF (L)",
+    "strictMode": "Link Bridge Mode",
+    "strictModeOn": "Link Bridge Mode: ON (L)",
+    "strictModeOff": "Link Bridge Mode: OFF (L)",
     "inputPlaceholder": "Enter a core concept...",
     "placeholders": [
       "Brainstorming...",
