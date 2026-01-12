@@ -1,24 +1,27 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch } from "vue";
 
 const props = defineProps({
   show: Boolean,
   initialText: String,
 });
 
-const emit = defineEmits(['close', 'save']);
+const emit = defineEmits(["close", "save"]);
 
-const inputValue = ref('');
+const inputValue = ref("");
 
-watch(() => props.show, (newVal) => {
-  if (newVal) {
-    inputValue.value = props.initialText || '';
+watch(
+  () => props.show,
+  (newVal) => {
+    if (newVal) {
+      inputValue.value = props.initialText || "";
+    }
   }
-});
+);
 
 const handleSave = () => {
   if (inputValue.value.trim()) {
-    emit('save', inputValue.value.trim());
+    emit("save", inputValue.value.trim());
   }
 };
 </script>
@@ -27,20 +30,24 @@ const handleSave = () => {
   <Transition name="fade">
     <div v-if="show" class="modal-overlay" @click="$emit('close')">
       <div class="modal glass" @click.stop>
-        <h3>编辑节点</h3>
+        <h3>{{ $t("modal.edit.title") }}</h3>
         <div class="input-wrapper glass-inset">
-          <input 
-            v-model="inputValue" 
-            type="text" 
+          <input
+            v-model="inputValue"
+            type="text"
             placeholder="输入新文本..."
             @keyup.enter="handleSave"
-            ref="inputRef" 
+            ref="inputRef"
             autofocus
           />
         </div>
         <div class="actions">
-          <button class="btn cancel" @click="$emit('close')">取消</button>
-          <button class="btn confirm" @click="handleSave">保存</button>
+          <button class="btn cancel" @click="$emit('close')">
+            {{ $t("modal.edit.cancel") }}
+          </button>
+          <button class="btn confirm" @click="handleSave">
+            {{ $t("modal.edit.save") }}
+          </button>
         </div>
       </div>
     </div>
@@ -69,7 +76,7 @@ const handleSave = () => {
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.95);
   text-align: center;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
 h3 {

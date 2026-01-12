@@ -13,7 +13,7 @@ const emit = defineEmits(["delete", "edit"]);
       <button
         class="icon-btn delete-btn"
         @click="$emit('delete')"
-        title="删除选中节点 (D)"
+        :title="$t('ui.actions.delete')"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -39,7 +39,7 @@ const emit = defineEmits(["delete", "edit"]);
         class="icon-btn edit-btn"
         :disabled="!canEdit"
         @click="$emit('edit')"
-        title="编辑最后选中节点 (E)"
+        :title="$t('ui.actions.edit')"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

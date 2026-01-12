@@ -56,10 +56,10 @@ const handleSave = () => {
   <Transition name="fade">
     <div v-if="show" class="modal-overlay">
       <div class="modal glass" @click.stop>
-        <h3>设置</h3>
+        <h3>{{ $t("modal.settings.title") }}</h3>
 
         <div class="field">
-          <label>节点可选上限</label>
+          <label>{{ $t("modal.settings.maxNodes") }}</label>
           <div class="input-wrapper glass-inset">
             <input
               v-model.number="maxSelectionCount"
@@ -71,7 +71,7 @@ const handleSave = () => {
         </div>
 
         <div class="field">
-          <label>生成关键词数量</label>
+          <label>{{ $t("modal.settings.maxGen") }}</label>
           <div class="input-wrapper glass-inset">
             <input
               v-model.number="generateCount"
@@ -84,30 +84,36 @@ const handleSave = () => {
         </div>
 
         <div class="field">
-          <label>AI 供应商</label>
+          <label>{{ $t("modal.settings.provider") }}</label>
           <div class="input-wrapper glass-inset">
             <select v-model="provider">
-              <option value="gemini">Google Gemini</option>
-              <option value="deepseek">DeepSeek</option>
-              <option value="local">Local / Custom (OpenAI Compatible)</option>
+              <option value="gemini">
+                {{ $t("modal.settings.providerGemini") }}
+              </option>
+              <option value="deepseek">
+                {{ $t("modal.settings.providerDeepSeek") }}
+              </option>
+              <option value="local">
+                {{ $t("modal.settings.providerLocal") }}
+              </option>
             </select>
           </div>
         </div>
 
         <div v-if="provider === 'gemini'" class="field">
-          <label>Gemini API Key</label>
+          <label>{{ $t("modal.settings.apiKey") }}</label>
           <div class="input-wrapper glass-inset">
             <input
               v-model="geminiKey"
               type="password"
-              placeholder="输入 Gemini key..."
+              :placeholder="$t('modal.settings.apiPlaceholder')"
             />
           </div>
-          <p class="hint">从 Google AI Studio 获取 key</p>
+          <p class="hint">{{ $t("modal.settings.hintGemini") }}</p>
         </div>
 
         <div v-if="provider === 'deepseek'" class="field">
-          <label>DeepSeek API Key</label>
+          <label>{{ $t("modal.settings.deepseekKey") }}</label>
           <div class="input-wrapper glass-inset">
             <input
               v-model="deepseekKey"
@@ -115,41 +121,49 @@ const handleSave = () => {
               placeholder="输入 DeepSeek key..."
             />
           </div>
-          <p class="hint">从 DeepSeek 获取 key</p>
+          <p class="hint">{{ $t("modal.settings.hintDeepSeek") }}</p>
         </div>
 
         <div v-if="provider === 'local'" class="local-fields">
           <div class="field">
-            <label>API URL</label>
+            <label>{{ $t("modal.settings.apiUrl") }}</label>
             <div class="input-wrapper glass-inset">
               <input
                 v-model="localBaseUrl"
                 type="text"
-                placeholder="例如 http://localhost:11434/v1"
+                :placeholder="$t('modal.settings.placeholderUrl')"
               />
             </div>
           </div>
           <div class="field">
-            <label>模型名称</label>
+            <label>{{ $t("modal.settings.modelName") }}</label>
             <div class="input-wrapper glass-inset">
               <input
                 v-model="localModelName"
                 type="text"
-                placeholder="例如 qwen2.5"
+                :placeholder="$t('modal.settings.placeholderModel')"
               />
             </div>
           </div>
           <div class="field">
-            <label>API Key (可选)</label>
+            <label>{{ $t("modal.settings.localKey") }}</label>
             <div class="input-wrapper glass-inset">
-              <input v-model="localApiKey" type="password" placeholder="可选" />
+              <input
+                v-model="localApiKey"
+                type="password"
+                :placeholder="$t('modal.settings.placeholderOptional')"
+              />
             </div>
           </div>
         </div>
 
         <div class="actions">
-          <button class="btn cancel" @click="$emit('close')">关闭</button>
-          <button class="btn confirm" @click="handleSave">保存</button>
+          <button class="btn cancel" @click="$emit('close')">
+            {{ $t("modal.edit.cancel") }}
+          </button>
+          <button class="btn confirm" @click="handleSave">
+            {{ $t("modal.settings.save") }}
+          </button>
         </div>
       </div>
     </div>

@@ -1,41 +1,36 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
+import { useI18n } from "vue-i18n";
 
-const props = defineProps({
-  modelValue: {
-    type: String,
-    default: "中文",
-  },
-});
+// Remove props/emits for modelValue as we use global i18n state
+// const props = defineProps({...});
+// const emit = defineEmits([...]);
 
-const emit = defineEmits(["update:modelValue"]);
+const { locale } = useI18n();
 
 const languages = [
-  { value: "中文", label: "中文" },
-  { value: "English", label: "English" },
-  { value: "日本語", label: "日本語" },
-  { value: "Español", label: "Español" },
-  { value: "Français", label: "Français" },
-  { value: "Deutsch", label: "Deutsch" },
-  { value: "한국어", label: "한국어" },
+  { value: "zh", label: "中文" },
+  { value: "en", label: "English" },
+  // Add more as we get translations
+  // { value: "ja", label: "日本語" },
 ];
 
 const showDropdown = ref(false);
 
 const selectLanguage = (lang) => {
-  emit("update:modelValue", lang.value);
-  localStorage.setItem("selected_language", lang.value);
+  locale.value = lang.value;
+  localStorage.setItem("selected_language", lang.label); // Keep legacy format or switch?
+  // Sticking to storing the code 'zh'/'en' is better, but existing code used '中文'/'English'.
+  // Let's migrate storage to codes: 'zh', 'en'.
+  // i18n.js handles the mapping from 'English' -> 'en' for legacy support.
+  localStorage.setItem("i18n_locale", lang.value);
   showDropdown.value = false;
 };
 
-const currentLanguage = ref(props.modelValue);
-
-watch(
-  () => props.modelValue,
-  (newVal) => {
-    currentLanguage.value = newVal;
-  }
-);
+const currentLabel = computed(() => {
+  const lang = languages.find((l) => l.value === locale.value);
+  return lang ? lang.label : locale.value;
+});
 </script>
 
 <template>
@@ -62,7 +57,7 @@ watch(
           d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
         ></path>
       </svg>
-      <span class="label">{{ modelValue }}</span>
+      <span class="label">{{ currentLabel }}</span>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="14"
@@ -84,7 +79,7 @@ watch(
         v-for="lang in languages"
         :key="lang.value"
         class="dropdown-item"
-        :class="{ active: lang.value === modelValue }"
+        :class="{ active: lang.value === locale }"
         @click="selectLanguage(lang)"
       >
         {{ lang.label }}

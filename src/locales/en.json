@@ -1,0 +1,82 @@
+{
+  "menu": {
+    "fullscreen": "Fullscreen",
+    "reset": "Reset Canvas",
+    "export": "Export JSON",
+    "import": "Import JSON",
+    "themeColor": "Theme Color",
+    "settings": "Settings"
+  },
+  "modal": {
+    "reset": {
+      "title": "Reset Canvas",
+      "message": "Are you sure you want to clear the canvas? This action cannot be undone.",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
+    "about": {
+      "title": "About OpenMind",
+      "developer": "Developer",
+      "contact": "Contact",
+      "github": "GitHub",
+      "desc": "A creative tool for brainstorming and mind mapping.",
+      "version": "Version"
+    },
+    "settings": {
+      "title": "Settings",
+      "apiKey": "Gemini API Key",
+      "apiPlaceholder": "Enter your API Key",
+      "hintGemini": "Get key from Google AI Studio",
+      "hintDeepSeek": "Get key from DeepSeek",
+      "provider": "AI Provider",
+      "providerGemini": "Google Gemini",
+      "providerDeepSeek": "DeepSeek",
+      "providerLocal": "Local / Custom (OpenAI Compatible)",
+      "deepseekKey": "DeepSeek API Key",
+      "apiUrl": "API URL",
+      "modelName": "Model Name",
+      "localKey": "API Key (Optional)",
+      "placeholderUrl": "e.g. http://localhost:11434/v1",
+      "placeholderModel": "e.g. qwen2.5",
+      "placeholderOptional": "Optional",
+      "maxNodes": "Max Multi-select Nodes",
+      "maxGen": "Keywords per Generation",
+      "save": "Save"
+    },
+    "edit": {
+      "title": "Edit Node",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "theme": {
+      "title": "Select Theme Color"
+    }
+  },
+  "toast": {
+    "importSuccess": "Import successful",
+    "importFailFormat": "Import failed: Invalid file format",
+    "importFailParse": "Import failed: Unable to parse file",
+    "missingKey": "API Key missing, please configure in Settings",
+    "genFail": "Generation failed, please try again",
+    "maxSelection": "Max selection limit reached ({limit})"
+  },
+  "ui": {
+    "language": "Language",
+    "strictMode": "Strict Mode",
+    "strictModeOn": "Strict Mode: ON (L)",
+    "strictModeOff": "Strict Mode: OFF (L)",
+    "inputPlaceholder": "Enter a core concept...",
+    "placeholders": [
+      "Brainstorming...",
+      "Explore new ideas...",
+      "Capture your inspiration...",
+      "Start mind mapping...",
+      "Creativity starts here...",
+      "Let ideas flow..."
+    ],
+    "actions": {
+      "delete": "Delete selected nodes (D)",
+      "edit": "Edit last selected node (E)"
+    }
+  }
+}

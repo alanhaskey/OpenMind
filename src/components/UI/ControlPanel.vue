@@ -13,7 +13,11 @@ const emit = defineEmits([
 
 <template>
   <div class="control-panel glass">
-    <button class="btn" @click="$emit('fullscreen')" title="全屏 (F)">
+    <button
+      class="btn"
+      @click="$emit('fullscreen')"
+      :title="$t('menu.fullscreen') + ' (F)'"
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="20"
@@ -31,7 +35,11 @@ const emit = defineEmits([
         <polyline points="9 21 3 21 3 15"></polyline>
       </svg>
     </button>
-    <button class="btn" @click="$emit('reset')" title="重置画布 (R)">
+    <button
+      class="btn"
+      @click="$emit('reset')"
+      :title="$t('menu.reset') + ' (R)'"
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="20"
@@ -49,7 +57,7 @@ const emit = defineEmits([
     </button>
 
     <div class="divider"></div>
-    <button class="btn" @click="$emit('export')" title="导出为JSON">
+    <button class="btn" @click="$emit('export')" :title="$t('menu.export')">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="20"
@@ -66,7 +74,7 @@ const emit = defineEmits([
         <line x1="12" y1="15" x2="12" y2="3"></line>
       </svg>
     </button>
-    <button class="btn" @click="$emit('import')" title="导入JSON">
+    <button class="btn" @click="$emit('import')" :title="$t('menu.import')">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="20"
@@ -83,7 +91,11 @@ const emit = defineEmits([
         <line x1="12" y1="3" x2="12" y2="15"></line>
       </svg>
     </button>
-    <button class="btn" @click="$emit('themeColor')" title="主题色">
+    <button
+      class="btn"
+      @click="$emit('themeColor')"
+      :title="$t('menu.themeColor')"
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="20"
@@ -112,7 +124,11 @@ const emit = defineEmits([
         />
       </svg>
     </button>
-    <button class="btn" @click="$emit('settings')" title="设置 (S)">
+    <button
+      class="btn"
+      @click="$emit('settings')"
+      :title="$t('menu.settings') + ' (S)'"
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="20"

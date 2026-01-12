@@ -13,6 +13,9 @@ import StrictModeToggle from "./components/UI/StrictModeToggle.vue";
 import LanguageSelector from "./components/UI/LanguageSelector.vue";
 import Toast from "./components/UI/Toast.vue"; // New Import
 import { getRelatedWords } from "./services/gemini";
+import { useI18n } from "vue-i18n";
+
+const { t, locale } = useI18n();
 
 const graphRef = ref(null);
 const inputBarRef = ref(null);
@@ -22,9 +25,7 @@ const showSettingsModal = ref(false);
 const showAboutModal = ref(false);
 const showEditModal = ref(false);
 const strictMode = ref(false);
-const selectedLanguage = ref(
-  localStorage.getItem("selected_language") || "中文"
-);
+// const selectedLanguage = ref(...) // Removed, using global i18n
 
 // Toast State
 const showToast = ref(false);
@@ -102,7 +103,7 @@ const handleNodeClick = async (node) => {
       contextWords,
       themes,
       strictMode.value,
-      selectedLanguage.value
+      locale.value === "en" ? "English" : "Chinese" // Pass appropriate string to API
     );
 
     if (related && Array.isArray(related)) {
@@ -125,9 +126,9 @@ const handleNodeClick = async (node) => {
       e.message.includes("Missing") &&
       e.message.includes("Key")
     ) {
-      showToastMessage("未配置 API Key，请在设置中配置", "warning");
+      showToastMessage(t("toast.missingKey"), "warning");
     } else {
-      showToastMessage("生成失败，请重试", "error");
+      showToastMessage(t("toast.genFail"), "error");
     }
   } finally {
     node.isLoading = false;
@@ -202,15 +203,15 @@ const handleFileChange = (event) => {
       if (graphRef.value) {
         const success = graphRef.value.importGraphState(json);
         if (success) {
-          showToastMessage("导入成功", "success");
+          showToastMessage(t("toast.importSuccess"), "success");
           hasStarted.value = true;
         } else {
-          showToastMessage("导入失败：文件格式不正确", "error");
+          showToastMessage(t("toast.importFailFormat"), "error");
         }
       }
     } catch (err) {
       console.error(err);
-      showToastMessage("导入失败：无法解析文件", "error");
+      showToastMessage(t("toast.importFailParse"), "error");
     }
   };
   reader.readAsText(file);
@@ -309,7 +310,7 @@ onUnmounted(() => {
     <LogoPiece @click="showAboutModal = true" />
 
     <StrictModeToggle v-model="strictMode" />
-    <LanguageSelector v-model="selectedLanguage" />
+    <LanguageSelector />
     <Toast
       v-if="showToast"
       :message="toastMessage"
@@ -348,8 +349,8 @@ onUnmounted(() => {
 
     <Modal
       :show="showResetModal"
-      title="重置画布"
-      message="确定要清空画布吗？此操作无法撤销。"
+      :title="t('modal.reset.title')"
+      :message="t('modal.reset.message')"
       @confirm="confirmReset"
       @cancel="showResetModal = false"
     />

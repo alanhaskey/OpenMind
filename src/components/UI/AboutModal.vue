@@ -11,19 +11,19 @@ const version = __APP_VERSION__;
   <Transition name="fade">
     <div v-if="show" class="modal-overlay" @click="$emit('close')">
       <div class="modal glass" @click.stop>
-        <h3>关于 OpenMind</h3>
+        <h3>{{ $t("modal.about.title") }}</h3>
 
         <div class="info-section">
           <div class="row">
-            <span class="label">开发者</span>
+            <span class="label">{{ $t("modal.about.developer") }}</span>
             <span class="value">Yunnn</span>
           </div>
           <div class="row">
-            <span class="label">联系方式</span>
+            <span class="label">{{ $t("modal.about.contact") }}</span>
             <span class="value">alanhaskey2013@qq.com</span>
           </div>
           <div class="row">
-            <span class="label">GitHub</span>
+            <span class="label">{{ $t("modal.about.github") }}</span>
             <a
               class="value"
               href="https://github.com/alanhaskey/OpenMind"
@@ -32,13 +32,15 @@ const version = __APP_VERSION__;
             >
           </div>
           <div class="row">
-            <span class="label">当前版本</span>
+            <span class="label">{{ $t("modal.about.version") }}</span>
             <span class="value">v{{ version }}</span>
           </div>
         </div>
 
         <div class="actions">
-          <button class="btn confirm" @click="$emit('close')">关闭</button>
+          <button class="btn confirm" @click="$emit('close')">
+            {{ $t("modal.edit.cancel") }}
+          </button>
         </div>
       </div>
     </div>

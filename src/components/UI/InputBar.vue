@@ -1,5 +1,6 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps({
   hasStarted: Boolean, // To trigger move to bottom
@@ -9,17 +10,12 @@ const emit = defineEmits(["submit"]);
 const inputValue = ref("");
 const inputRef = ref(null);
 
-// Dynamic placeholder functionality
-const placeholderTexts = [
-  "头脑风暴一下...",
-  "探索新想法...",
-  "记录你的灵感...",
-  "开始思维导图...",
-  "创意从这里开始...",
-  "让想法自由流动...",
-];
+const { tm } = useI18n();
 
-const currentPlaceholder = ref(placeholderTexts[0]);
+// Dynamic placeholder functionality
+const getPlaceholderTexts = () => tm("ui.placeholders") || [];
+
+const currentPlaceholder = ref(getPlaceholderTexts()[0] || "");
 let placeholderInterval = null;
 let currentIndex = 0;
 
@@ -31,20 +27,27 @@ const isDynamicPlaceholderEnabled = () => {
 
 // Start placeholder rotation
 const startPlaceholderRotation = () => {
+  const texts = getPlaceholderTexts();
+  if (texts.length === 0) return;
+
   if (!isDynamicPlaceholderEnabled()) {
-    currentPlaceholder.value = placeholderTexts[0];
+    currentPlaceholder.value = texts[0];
     return;
   }
 
+  // Clear existing to avoid multiple intervals
+  if (placeholderInterval) clearInterval(placeholderInterval);
+
   placeholderInterval = setInterval(() => {
+    const currentTexts = getPlaceholderTexts(); // Re-fetch in case locale changed
     if (!isDynamicPlaceholderEnabled()) {
       clearInterval(placeholderInterval);
-      currentPlaceholder.value = placeholderTexts[0];
+      currentPlaceholder.value = currentTexts[0];
       return;
     }
 
-    currentIndex = (currentIndex + 1) % placeholderTexts.length;
-    currentPlaceholder.value = placeholderTexts[currentIndex];
+    currentIndex = (currentIndex + 1) % currentTexts.length;
+    currentPlaceholder.value = currentTexts[currentIndex];
   }, 3500); // Change every 3.5 seconds
 };
 
@@ -53,6 +56,17 @@ const handleSubmit = () => {
   emit("submit", inputValue.value.trim());
   inputValue.value = "";
 };
+
+const { locale } = useI18n(); // Destructure locale for watching
+
+watch(locale, () => {
+  // When locale changes, reset placeholder immediately to valid one from new language
+  const texts = getPlaceholderTexts();
+  if (texts.length > 0) {
+    currentPlaceholder.value = texts[0];
+  }
+  startPlaceholderRotation();
+});
 
 onMounted(() => {
   startPlaceholderRotation();

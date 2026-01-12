@@ -1,0 +1,82 @@
+{
+  "menu": {
+    "fullscreen": "全屏",
+    "reset": "重置画布",
+    "export": "导出JSON",
+    "import": "导入JSON",
+    "themeColor": "主题色",
+    "settings": "设置"
+  },
+  "modal": {
+    "reset": {
+      "title": "重置画布",
+      "message": "确定要清空画布吗？此操作无法撤销。",
+      "confirm": "确定",
+      "cancel": "取消"
+    },
+    "about": {
+      "title": "关于 OpenMind",
+      "developer": "开发者",
+      "contact": "联系方式",
+      "github": "GitHub",
+      "desc": "一个用于头脑风暴和思维导图的创意工具。",
+      "version": "版本"
+    },
+    "settings": {
+      "title": "设置",
+      "apiKey": "Gemini API Key",
+      "apiPlaceholder": "输入您的 API Key",
+      "hintGemini": "从 Google AI Studio 获取 key",
+      "hintDeepSeek": "从 DeepSeek 获取 key",
+      "provider": "AI 供应商",
+      "providerGemini": "Google Gemini",
+      "providerDeepSeek": "DeepSeek",
+      "providerLocal": "本地 / 自定义 (OpenAI 兼容)",
+      "deepseekKey": "DeepSeek API Key",
+      "apiUrl": "API 地址",
+      "modelName": "模型名称",
+      "localKey": "API Key (可选)",
+      "placeholderUrl": "例如 http://localhost:11434/v1",
+      "placeholderModel": "例如 qwen2.5",
+      "placeholderOptional": "可选",
+      "maxNodes": "最大多选节点数",
+      "maxGen": "单次生成关键词数",
+      "save": "保存"
+    },
+    "edit": {
+      "title": "编辑节点",
+      "save": "保存",
+      "cancel": "取消"
+    },
+    "theme": {
+      "title": "选择主题色"
+    }
+  },
+  "toast": {
+    "importSuccess": "导入成功",
+    "importFailFormat": "导入失败：文件格式不正确",
+    "importFailParse": "导入失败：无法解析文件",
+    "missingKey": "未配置 API Key，请在设置中配置",
+    "genFail": "生成失败，请重试",
+    "maxSelection": "已达到最大选择数量 ({limit})"
+  },
+  "ui": {
+    "language": "语言",
+    "strictMode": "主题限定模式",
+    "strictModeOn": "主题限定模式：已开启 (L)",
+    "strictModeOff": "主题限定模式：已关闭 (L)",
+    "inputPlaceholder": "输入一个核心概念...",
+    "placeholders": [
+      "头脑风暴一下...",
+      "探索新想法...",
+      "记录你的灵感...",
+      "开始思维导图...",
+      "创意从这里开始...",
+      "让想法自由流动..."
+    ],
+    "actions": {
+      "delete": "删除选中节点 (D)",
+      "edit": "编辑最后选中节点 (E)"
+    }
+  }
+}
