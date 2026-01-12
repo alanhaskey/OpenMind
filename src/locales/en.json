@@ -55,7 +55,12 @@
       "cancel": "Cancel"
     },
     "theme": {
-      "title": "Select Theme Color"
+      "title": "Customize Theme Color",
+      "reset": "Reset to Default",
+      "preset": "Backup Preset",
+      "default": "Default",
+      "backup": "Preset",
+      "save": "Save"
     }
   },
   "toast": {

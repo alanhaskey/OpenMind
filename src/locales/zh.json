@@ -55,7 +55,12 @@
       "cancel": "取消"
     },
     "theme": {
-      "title": "选择主题色"
+      "title": "自定义主题色",
+      "reset": "恢复默认色",
+      "preset": "备用色",
+      "default": "默认",
+      "backup": "预设",
+      "save": "保存"
     }
   },
   "toast": {

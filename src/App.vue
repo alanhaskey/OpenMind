@@ -12,6 +12,8 @@ import EditNodeModal from "./components/UI/EditNodeModal.vue";
 import StrictModeToggle from "./components/UI/StrictModeToggle.vue";
 import LanguageSelector from "./components/UI/LanguageSelector.vue";
 import Toast from "./components/UI/Toast.vue"; // New Import
+import ThemeColorModal from "./components/UI/ThemeColorModal.vue";
+
 import { getRelatedWords } from "./services/aiService";
 import { useI18n } from "vue-i18n";
 
@@ -24,6 +26,8 @@ const showResetModal = ref(false);
 const showSettingsModal = ref(false);
 const showAboutModal = ref(false);
 const showEditModal = ref(false);
+const showThemeColorModal = ref(false);
+
 const strictMode = ref(false);
 // const selectedLanguage = ref(...) // Removed, using global i18n
 
@@ -298,6 +302,12 @@ const handleKeydown = (e) => {
 
 onMounted(() => {
   window.addEventListener("keydown", handleKeydown);
+
+  // Initialize Theme Color
+  const storedColor = localStorage.getItem("theme_color");
+  if (storedColor) {
+    document.documentElement.style.setProperty("--color-primary", storedColor);
+  }
 });
 
 onUnmounted(() => {
@@ -375,6 +385,11 @@ onUnmounted(() => {
       :initial-text="editingNodeText"
       @close="showEditModal = false"
       @save="saveNodeEdit"
+    />
+
+    <ThemeColorModal
+      :show="showThemeColorModal"
+      @close="showThemeColorModal = false"
     />
   </div>
 </template>

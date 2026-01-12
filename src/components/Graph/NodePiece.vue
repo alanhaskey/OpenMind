@@ -69,7 +69,11 @@ const style = computed(() => ({
 }
 
 .node.center {
-  background: rgba(255, 255, 0, 0.1); /* Subtle yellow tint */
+  background: color-mix(
+    in srgb,
+    var(--color-primary) 10%,
+    transparent
+  ); /* Dynamic tint */
   border-color: var(--color-primary);
 }
 
