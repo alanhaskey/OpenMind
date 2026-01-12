@@ -168,6 +168,47 @@ export function useGraph(width, height) {
     };
   };
 
+  const exportGraphState = () => {
+    return {
+      nodes: nodes.value.map(n => ({...n, fx: null, fy: null})), // Clean up fixed positions if any
+      links: links.value.map(l => {
+        // Serialize links back to IDs
+        const source = typeof l.source === 'object' ? l.source.id : l.source;
+        const target = typeof l.target === 'object' ? l.target.id : l.target;
+        return { source, target };
+      })
+    };
+  };
+
+  const importGraphState = (data) => {
+    if (!data || !data.nodes) {
+      console.warn("Invalid graph data");
+      return false;
+    }
+
+    clearGraph();
+    
+    // Allow Vue to react to clearGraph first
+    setTimeout(() => {
+      nodes.value = data.nodes.map(n => ({
+        ...n,
+        x: n.x || width/2,
+        y: n.y || height/2,
+        vx: 0, 
+        vy: 0
+      }));
+      
+      links.value = (data.links || []).map(l => ({
+        source: l.source,
+        target: l.target
+      }));
+      
+      restartSimulation();
+    }, 50);
+
+    return true;
+  };
+
   // Drag handlers
   const dragStarted = (event, node) => {
     if (!event.active) simulation.value.alphaTarget(0.3).restart();
@@ -204,6 +245,8 @@ export function useGraph(width, height) {
     getGraphData,
     dragStarted,
     dragged,
-    dragEnded
+    dragEnded,
+    exportGraphState,
+    importGraphState
   };
 }

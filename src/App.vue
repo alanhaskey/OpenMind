@@ -168,7 +168,7 @@ const handleSettingsSave = () => {
 const onExportRequest = () => {
   if (!graphRef.value) return;
 
-  const data = graphRef.value.getGraphData();
+  const data = graphRef.value.exportGraphState();
   const json = JSON.stringify(data, null, 2);
   const blob = new Blob([json], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -179,6 +179,41 @@ const onExportRequest = () => {
   a.click();
 
   URL.revokeObjectURL(url);
+};
+
+// Import Flow
+const fileInputRef = ref(null);
+
+const onImportRequest = () => {
+  if (fileInputRef.value) {
+    fileInputRef.value.value = ""; // Reset
+    fileInputRef.value.click();
+  }
+};
+
+const handleFileChange = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const json = JSON.parse(e.target.result);
+      if (graphRef.value) {
+        const success = graphRef.value.importGraphState(json);
+        if (success) {
+          showToastMessage("导入成功", "success");
+          hasStarted.value = true;
+        } else {
+          showToastMessage("导入失败：文件格式不正确", "error");
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      showToastMessage("导入失败：无法解析文件", "error");
+    }
+  };
+  reader.readAsText(file);
 };
 
 // Fullscreen Flow
@@ -282,6 +317,14 @@ onUnmounted(() => {
       @close="showToast = false"
     />
 
+    <input
+      type="file"
+      ref="fileInputRef"
+      accept=".json"
+      style="display: none"
+      @change="handleFileChange"
+    />
+
     <GraphCanvas
       ref="graphRef"
       @node-click="handleNodeClick"
@@ -298,6 +341,7 @@ onUnmounted(() => {
       @reset="onResetRequest"
       @settings="onSettingsRequest"
       @export="onExportRequest"
+      @import="onImportRequest"
       @fullscreen="onFullscreenRequest"
       @themeColor="onThemeColorRequest"
     />

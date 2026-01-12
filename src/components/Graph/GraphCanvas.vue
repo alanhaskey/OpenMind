@@ -29,6 +29,8 @@ const {
   dragStarted,
   dragged,
   dragEnded,
+  exportGraphState,
+  importGraphState,
 } = useGraph(width.value, height.value);
 
 const handleResize = () => {
@@ -124,6 +126,8 @@ defineExpose({
   updateNodeText,
   getGraphData,
   panToNode,
+  exportGraphState,
+  importGraphState,
 });
 
 // Helper for line coordinates
