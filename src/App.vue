@@ -12,7 +12,7 @@ import EditNodeModal from "./components/UI/EditNodeModal.vue";
 import StrictModeToggle from "./components/UI/StrictModeToggle.vue";
 import LanguageSelector from "./components/UI/LanguageSelector.vue";
 import Toast from "./components/UI/Toast.vue"; // New Import
-import { getRelatedWords } from "./services/gemini";
+import { getRelatedWords } from "./services/aiService";
 import { useI18n } from "vue-i18n";
 
 const { t, locale } = useI18n();

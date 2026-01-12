@@ -9,6 +9,8 @@ const emit = defineEmits(["close", "save"]);
 const provider = ref("gemini");
 const geminiKey = ref("");
 const deepseekKey = ref("");
+const kimiKey = ref("");
+const qwenKey = ref("");
 const localBaseUrl = ref("http://localhost:11434/v1");
 const localModelName = ref("qwen2.5");
 const localApiKey = ref("");
@@ -23,6 +25,8 @@ watch(
       provider.value = localStorage.getItem("llm_provider") || "gemini";
       geminiKey.value = localStorage.getItem("gemini_api_key") || "";
       deepseekKey.value = localStorage.getItem("deepseek_api_key") || "";
+      kimiKey.value = localStorage.getItem("kimi_api_key") || "";
+      qwenKey.value = localStorage.getItem("qwen_api_key") || "";
       localBaseUrl.value =
         localStorage.getItem("local_base_url") || "http://localhost:11434/v1";
       localModelName.value =
@@ -42,6 +46,8 @@ const handleSave = () => {
   localStorage.setItem("llm_provider", provider.value);
   localStorage.setItem("gemini_api_key", geminiKey.value.trim());
   localStorage.setItem("deepseek_api_key", deepseekKey.value.trim());
+  localStorage.setItem("kimi_api_key", kimiKey.value.trim());
+  localStorage.setItem("qwen_api_key", qwenKey.value.trim());
   localStorage.setItem("local_base_url", localBaseUrl.value.trim());
   localStorage.setItem("local_model_name", localModelName.value.trim());
   localStorage.setItem("local_api_key", localApiKey.value.trim());
@@ -93,6 +99,12 @@ const handleSave = () => {
               <option value="deepseek">
                 {{ $t("modal.settings.providerDeepSeek") }}
               </option>
+              <option value="kimi">
+                {{ $t("modal.settings.providerKimi") }}
+              </option>
+              <option value="qwen">
+                {{ $t("modal.settings.providerQwen") }}
+              </option>
               <option value="local">
                 {{ $t("modal.settings.providerLocal") }}
               </option>
@@ -122,6 +134,30 @@ const handleSave = () => {
             />
           </div>
           <p class="hint">{{ $t("modal.settings.hintDeepSeek") }}</p>
+        </div>
+
+        <div v-if="provider === 'kimi'" class="field">
+          <label>{{ $t("modal.settings.kimiKey") }}</label>
+          <div class="input-wrapper glass-inset">
+            <input
+              v-model="kimiKey"
+              type="password"
+              placeholder="输入 Moonshot key..."
+            />
+          </div>
+          <p class="hint">{{ $t("modal.settings.hintKimi") }}</p>
+        </div>
+
+        <div v-if="provider === 'qwen'" class="field">
+          <label>{{ $t("modal.settings.qwenKey") }}</label>
+          <div class="input-wrapper glass-inset">
+            <input
+              v-model="qwenKey"
+              type="password"
+              placeholder="输入 DashesScope key..."
+            />
+          </div>
+          <p class="hint">{{ $t("modal.settings.hintQwen") }}</p>
         </div>
 
         <div v-if="provider === 'local'" class="local-fields">

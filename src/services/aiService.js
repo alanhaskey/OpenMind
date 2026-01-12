@@ -126,6 +126,26 @@ export async function getRelatedWords(word, count = 6, context = [], themes = []
       const apiKey = localStorage.getItem('local_api_key') || ''; // Optional
       return await callOpenAICompatible(baseUrl, apiKey, modelName, word, count, context, themes, strictMode, language);
     }
+    else if (provider === 'kimi') {
+      const apiKey = localStorage.getItem('kimi_api_key');
+      if (!apiKey) throw new Error("Missing Kimi Key");
+      return await callOpenAICompatible(
+        "https://api.moonshot.cn/v1", 
+        apiKey, 
+        "moonshot-v1-8k", 
+        word, count, context, themes, strictMode, language
+      );
+    }
+    else if (provider === 'qwen') {
+      const apiKey = localStorage.getItem('qwen_api_key');
+      if (!apiKey) throw new Error("Missing Qwen Key");
+      return await callOpenAICompatible(
+        "https://dashscope.aliyuncs.com/compatible-mode/v1", 
+        apiKey, 
+        "qwen-plus", 
+        word, count, context, themes, strictMode, language
+      );
+    }
   } catch (error) {
     console.error(`${provider} API Error:`, error);
     throw error;
