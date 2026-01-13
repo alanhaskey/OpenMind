@@ -49,7 +49,11 @@
       "maxGen": "Keywords per Generation",
       "save": "Save",
       "maxNodesPlaceholder": "Optional (default no limit)",
-      "maxGenPlaceholder": "Default 6"
+      "maxGenPlaceholder": "Default 6",
+      "searchConfig": "Internet Search",
+      "serperKey": "Serper API Key",
+      "serviceUrl": "Service URL",
+      "hintSerper": "Get key from serper.dev for Search Mode"
     },
     "edit": {
       "title": "Edit Node",
@@ -109,7 +113,8 @@
     "deep": "Deep (Philosophy)",
     "learning": "Learning",
     "document": "Document Context",
-    "custom": "Custom Prompt"
+    "custom": "Custom Prompt",
+    "search": "Internet Search"
   },
   "sheet": {
     "new": "New Sheet"

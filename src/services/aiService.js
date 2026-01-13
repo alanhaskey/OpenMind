@@ -100,6 +100,9 @@ async function callDeepSeek(apiKey, word, count, context, themes, strictMode, la
         { role: "system", content: "你是一个专业的创意头脑风暴助手。请严格按照要求输出 JSON 格式。" },
         { role: "user", content: prompt }
       ],
+      response_format: {
+        'type': 'json_object'
+      },
       stream: false
     })
   });
@@ -154,25 +157,83 @@ async function callOpenAICompatible(baseUrl, apiKey, modelName, word, count, con
   return JSON.parse(cleanText);
 }
 
-export async function getRelatedWords(word, count = 6, context = [], themes = [], strictMode = false, language = '中文', mode = 'tree', customPrompt = '', documentContent = '') {
+async function callSerper(baseUrl, apiKey, query) {
+  const url = baseUrl || "https://google.serper.dev/search";
+  
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "X-API-KEY": apiKey,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      q: query,
+      num: 5, // Top 5 results
+      gl: "cn", // Localization: China (can be dynamic)
+      hl: "zh-cn"
+    })
+  });
+
+  if (!response.ok) {
+     console.error("Serper API Error:", response.status, response.statusText);
+     return ""; // Return empty on failure to degrade gracefully
+  }
+
+  const data = await response.json();
+  const organic = data.organic || [];
+  
+  // Format snippets
+  return organic.map((item, index) => {
+    return `[${index + 1}] ${item.title}: ${item.snippet}`;
+  }).join("\n");
+}
+
+export async function getRelatedWords(word, count = 6, context = [], themes = [], strictMode = false, language = '中文', mode = 'tree', customPrompt = '', documentContent = '', useSearch = false) {
   const provider = localStorage.getItem('llm_provider') || 'gemini';
+  
+  // Handle Search Mode Pre-fetch (Global Switch)
+  let searchContext = "";
+  if (useSearch) {
+    const serperKey = localStorage.getItem('serper_api_key');
+    const serperBaseUrl = localStorage.getItem('serper_base_url');
+    if (serperKey) {
+      try {
+        searchContext = await callSerper(serperBaseUrl, serperKey, word);
+      } catch (e) {
+        console.error("Search failed:", e);
+      }
+    }
+  }
+
+  // Prepend search results to documentContent or create a new context section
+  // This allows search results to enhance ANY mode
+  let finalContext = documentContent;
+  if (searchContext) {
+    // If document content exists, combine them. If not, just use search context.
+    // We format it clearly so the model knows source vs content.
+    if (finalContext) {
+      finalContext = `[Internet Search Results for '${word}':\n${searchContext}\n\n[Document/Existing Context]:\n${finalContext}`;
+    } else {
+      finalContext = `[Internet Search Results for '${word}':\n${searchContext}`;
+    }
+  }
   
   try {
     if (provider === 'gemini') {
       const apiKey = localStorage.getItem('gemini_api_key');
       if (!apiKey) throw new Error("Missing Gemini Key");
-      return await callGemini(apiKey, word, count, context, themes, strictMode, language, mode, customPrompt, documentContent);
+      return await callGemini(apiKey, word, count, context, themes, strictMode, language, mode, customPrompt, finalContext);
     } 
     else if (provider === 'deepseek') {
       const apiKey = localStorage.getItem('deepseek_api_key');
       if (!apiKey) throw new Error("Missing DeepSeek Key");
-      return await callDeepSeek(apiKey, word, count, context, themes, strictMode, language, mode, customPrompt, documentContent);
+      return await callDeepSeek(apiKey, word, count, context, themes, strictMode, language, mode, customPrompt, finalContext);
     }
     else if (provider === 'local') {
       const baseUrl = localStorage.getItem('local_base_url') || 'http://localhost:11434/v1';
       const modelName = localStorage.getItem('local_model_name') || 'qwen2.5';
       const apiKey = localStorage.getItem('local_api_key') || ''; // Optional
-      return await callOpenAICompatible(baseUrl, apiKey, modelName, word, count, context, themes, strictMode, language, mode, customPrompt, documentContent);
+      return await callOpenAICompatible(baseUrl, apiKey, modelName, word, count, context, themes, strictMode, language, mode, customPrompt, finalContext);
     }
     else if (provider === 'kimi') {
       const apiKey = localStorage.getItem('kimi_api_key');
@@ -181,7 +242,7 @@ export async function getRelatedWords(word, count = 6, context = [], themes = []
         "https://api.moonshot.cn/v1", 
         apiKey, 
         "moonshot-v1-8k", 
-        word, count, context, themes, strictMode, language, mode, customPrompt, documentContent
+        word, count, context, themes, strictMode, language, mode, customPrompt, finalContext
       );
     }
     else if (provider === 'qwen') {
@@ -191,7 +252,7 @@ export async function getRelatedWords(word, count = 6, context = [], themes = []
         "https://dashscope.aliyuncs.com/compatible-mode/v1", 
         apiKey, 
         "qwen-plus", 
-        word, count, context, themes, strictMode, language, mode, customPrompt, documentContent
+        word, count, context, themes, strictMode, language, mode, customPrompt, finalContext
       );
     }
   } catch (error) {

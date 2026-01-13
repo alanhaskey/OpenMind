@@ -49,7 +49,11 @@
       "maxGen": "单次生成关键词数",
       "save": "保存",
       "maxNodesPlaceholder": "可选（默认无限制）",
-      "maxGenPlaceholder": "默认 6"
+      "maxGenPlaceholder": "默认 6",
+      "searchConfig": "联网搜索",
+      "serperKey": "Serper API Key",
+      "serviceUrl": "服务供应商 URL",
+      "hintSerper": "从 serper.dev 获取 Key，用于联网搜索模式"
     },
     "edit": {
       "title": "编辑节点",
@@ -109,7 +113,8 @@
     "deep": "深度联想",
     "learning": "学习联想",
     "document": "文档联想",
-    "custom": "自定义联想"
+    "custom": "自定义联想",
+    "search": "联网搜索"
   },
   "sheet": {
     "new": "新建画布"

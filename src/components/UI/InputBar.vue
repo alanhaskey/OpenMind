@@ -8,11 +8,20 @@ const props = defineProps({
     type: String,
     default: "related",
   },
+  isSearchEnabled: {
+    type: Boolean,
+    default: false,
+  },
+  hasSerperKey: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits([
   "submit",
   "update:associationMode",
+  "update:isSearchEnabled",
   "request-custom-prompt",
   "request-document-upload",
 ]);
@@ -29,18 +38,22 @@ let placeholderInterval = null;
 let currentIndex = 0;
 
 // Association Modes
-const modes = computed(() => [
-  { value: "related", label: tm("modes.related") },
-  { value: "tree", label: tm("modes.tree") },
-  { value: "creative", label: tm("modes.creative") },
-  { value: "deep", label: tm("modes.deep") },
-  { value: "learning", label: tm("modes.learning") },
-  { value: "document", label: tm("modes.document") },
-  { value: "custom", label: tm("modes.custom") },
-]);
-
 const selectedMode = ref(props.associationMode);
 const showModeMenu = ref(false);
+// const hasSerperKey = ref(false); // Removed internal ref
+
+const modes = computed(() => {
+  const allModes = [
+    { value: "related", label: tm("modes.related") },
+    { value: "tree", label: tm("modes.tree") },
+    { value: "creative", label: tm("modes.creative") },
+    { value: "deep", label: tm("modes.deep") },
+    { value: "learning", label: tm("modes.learning") },
+    { value: "document", label: tm("modes.document") },
+    { value: "custom", label: tm("modes.custom") },
+  ];
+  return allModes;
+});
 
 const currentModeLabel = computed(() => {
   const mode = modes.value.find((m) => m.value === selectedMode.value);
@@ -53,6 +66,10 @@ watch(
     selectedMode.value = newVal;
   }
 );
+
+const toggleSearch = () => {
+  emit("update:isSearchEnabled", !props.isSearchEnabled);
+};
 
 const toggleModeMenu = () => {
   showModeMenu.value = !showModeMenu.value;
@@ -130,6 +147,9 @@ watch(locale, () => {
 onMounted(() => {
   document.addEventListener("click", handleClickOutside);
   startPlaceholderRotation();
+  // Check key on mount (e.g. if loaded for first time and key exists)
+  // const key = localStorage.getItem("serper_api_key");
+  // hasSerperKey.value = !!key && key.trim().length > 0;
 });
 
 onUnmounted(() => {
@@ -164,6 +184,7 @@ defineExpose({
           @click="toggleModeMenu"
           :title="currentModeLabel"
         >
+          <!-- Default Grid Icon -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="20"
@@ -200,6 +221,38 @@ defineExpose({
             </div>
           </div>
         </Transition>
+      </div>
+
+      <!-- Search Toggle (Visible if Key exists) -->
+      <div
+        v-if="hasSerperKey"
+        class="search-toggle-wrapper"
+        style="margin-right: 8px"
+      >
+        <button
+          class="mode-btn"
+          :class="{ 'active-search': isSearchEnabled }"
+          @click="toggleSearch"
+          :title="tm('modes.search')"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <path
+              d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+            ></path>
+          </svg>
+        </button>
       </div>
 
       <input
@@ -322,6 +375,11 @@ defineExpose({
 .mode-btn:hover {
   background: rgba(0, 0, 0, 0.05);
   color: var(--color-primary);
+}
+
+.mode-btn.active-search {
+  color: var(--color-primary);
+  background: rgba(var(--color-primary-rgb), 0.1);
 }
 
 .mode-menu {

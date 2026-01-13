@@ -33,10 +33,18 @@ const showThemeColorModal = ref(false);
 const showCustomPromptModal = ref(false);
 
 const strictMode = ref(false);
+const isSearchEnabled = ref(false); // Search Toggle State
+const hasSerperKey = ref(false); // Dynamic Key Availability
 
 const associationMode = ref("related");
 const customPrompt = ref("");
 const documentContent = ref("");
+
+// Helper to check key
+const checkSerperKey = () => {
+  const key = localStorage.getItem("serper_api_key");
+  hasSerperKey.value = !!key && key.trim().length > 0;
+};
 
 // Toast State
 const showToast = ref(false);
@@ -167,7 +175,8 @@ const handleNodeClick = async (node) => {
       locale.value === "en" ? "English" : "Chinese",
       associationMode.value,
       customPrompt.value,
-      documentContent.value
+      documentContent.value,
+      isSearchEnabled.value // Pass Search Toggle State
     );
 
     // Initial wait (optional optimization: if strict mode is off, we might not want to wait 1.5s?
@@ -240,6 +249,7 @@ const onSettingsRequest = () => {
 
 const handleSettingsSave = () => {
   showSettingsModal.value = false;
+  checkSerperKey(); // Update key status immediately
 };
 
 // Export Flow
@@ -463,6 +473,8 @@ onMounted(() => {
     document.documentElement.style.setProperty("--color-primary", storedColor);
   }
 
+  checkSerperKey(); // Check key on mount
+
   // Check for updates
   checkForUpdates().then((result) => {
     if (result.hasUpdate) {
@@ -519,6 +531,8 @@ onUnmounted(() => {
       ref="inputBarRef"
       :has-started="hasStarted"
       v-model:associationMode="associationMode"
+      v-model:isSearchEnabled="isSearchEnabled"
+      :has-serper-key="hasSerperKey"
       @submit="handleInputSubmit"
       @request-custom-prompt="onRequestCustomPrompt"
       @request-document-upload="onRequestDocumentUpload"
