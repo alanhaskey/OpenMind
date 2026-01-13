@@ -36,9 +36,47 @@ export function useGraph(width, height) {
       .force('charge', d3.forceManyBody().strength(-100))
       .force('center', d3.forceCenter(w / 2, h / 2))
       .force('link', d3.forceLink(visibleLinks.value).id(d => d.id).distance(100))
-      .force('collide', d3.forceCollide().radius(55).iterations(2))
+      // Custom collision force: only collide if same rootId
+      .force('collide', (alpha) => {
+        const nodes = visibleNodes.value;
+        const radius = 55;
+        const strength = 0.7; // Collision strength
+
+        for (let i = 0; i < nodes.length; ++i) {
+          for (let j = i + 1; j < nodes.length; ++j) {
+            const nodeA = nodes[i];
+            const nodeB = nodes[j];
+            
+            // Only collide if they belong to the same sheet
+            if (nodeA.rootId !== nodeB.rootId) continue;
+
+            const dx = nodeA.x - nodeB.x;
+            const dy = nodeA.y - nodeB.y;
+            let l2 = dx * dx + dy * dy;
+            const r = radius + radius; // Assumes fixed radius for now
+            const r2 = r * r;
+
+            if (l2 < r2) {
+              if (l2 === 0) {
+                 nodeA.vx += (Math.random() - 0.5) * 0.1;
+                 nodeA.vy += (Math.random() - 0.5) * 0.1;
+                 continue;
+              }
+              const l = Math.sqrt(l2);
+              const overlap = r - l;
+              const fx = (dx / l) * overlap * strength * alpha;
+              const fy = (dy / l) * overlap * strength * alpha;
+
+              nodeA.vx += fx;
+              nodeA.vy += fy;
+              nodeB.vx -= fx;
+              nodeB.vy -= fy;
+            }
+          }
+        }
+      })
       .on('tick', () => {
-        // Trigger reactivity for position updates if needed
+        // Trigger reactivity for position updates
       });
   };
 
