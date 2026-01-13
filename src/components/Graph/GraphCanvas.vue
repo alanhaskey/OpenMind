@@ -129,35 +129,48 @@ defineExpose({
   exportGraphState,
   importGraphState,
   links,
-  startPathAnimation: (nodeIds) => {
-    if (!nodeIds || nodeIds.length < 2) return;
-
-    // 1. Highlight Nodes
-    nodeIds.forEach((id) => {
-      d3.select(`[data-node-id="${id}"]`).classed("highlight-node", true);
-    });
-
-    // 2. Highlight Links
-    // We need to match pairs in the path: (0->1), (1->2), etc.
-    const pairs = [];
-    for (let i = 0; i < nodeIds.length - 1; i++) {
-      pairs.push({ source: nodeIds[i], target: nodeIds[i + 1] });
+  startPathAnimation: (nodeIds, contextNodeIds = []) => {
+    // 1. Highlight Path Nodes
+    if (nodeIds && nodeIds.length > 0) {
+      nodeIds.forEach((id) => {
+        d3.select(`[data-node-id="${id}"]`).classed("highlight-node", true);
+      });
     }
 
-    // Identify and highlight links provided by current state
-    pairs.forEach((p) => {
-      // Search for line element matching this pair (ignoring direction)
-      const selector = `line[data-source="${p.source}"][data-target="${p.target}"], line[data-source="${p.target}"][data-target="${p.source}"]`;
-      const linkEl = d3.select(selector);
-      if (!linkEl.empty()) {
-        linkEl.classed("highlight-link", true).raise();
+    // 2. Highlight Context Nodes (Background Reference)
+    if (contextNodeIds && contextNodeIds.length > 0) {
+      contextNodeIds.forEach((id) => {
+        // Only highlight if not already highlighted as part of path
+        if (!nodeIds || !nodeIds.includes(id)) {
+          d3.select(`[data-node-id="${id}"]`).classed(
+            "highlight-context",
+            true
+          );
+        }
+      });
+    }
+
+    // 3. Highlight Links (only for path)
+    if (nodeIds && nodeIds.length >= 2) {
+      const pairs = [];
+      for (let i = 0; i < nodeIds.length - 1; i++) {
+        pairs.push({ source: nodeIds[i], target: nodeIds[i + 1] });
       }
-    });
+
+      pairs.forEach((p) => {
+        const selector = `line[data-source="${p.source}"][data-target="${p.target}"], line[data-source="${p.target}"][data-target="${p.source}"]`;
+        const linkEl = d3.select(selector);
+        if (!linkEl.empty()) {
+          linkEl.classed("highlight-link", true).raise();
+        }
+      });
+    }
   },
 
   stopPathAnimation: () => {
     d3.selectAll(".highlight-node").classed("highlight-node", false);
     d3.selectAll(".highlight-link").classed("highlight-link", false);
+    d3.selectAll(".highlight-context").classed("highlight-context", false);
   },
 });
 
@@ -331,6 +344,28 @@ const isNodeLastSelected = (node) => {
     box-shadow: 0 0 25px var(--color-primary, #3498db),
       inset 0 0 20px var(--color-primary, #3498db);
     border-color: white;
+  }
+}
+</style>
+
+<style scoped>
+/* Append context styles ensuring they are present */
+:deep(.highlight-context) {
+  /* Context nodes get a different, steadier pulse */
+  transform: translate(var(--x), var(--y)) translate(-50%, -50%);
+  z-index: 90;
+  animation: context-pulse 2s ease-in-out infinite alternate;
+  border-style: dashed !important;
+}
+
+@keyframes context-pulse {
+  from {
+    box-shadow: 0 0 5px var(--color-primary);
+    background: rgba(255, 255, 255, 0.05);
+  }
+  to {
+    box-shadow: 0 0 15px var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary), transparent 90%);
   }
 }
 </style>

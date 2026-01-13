@@ -136,8 +136,13 @@ const handleNodeClick = async (node) => {
         }
 
         // Trigger Animation Start
+        // Pass Path Ids AND Context Ids (selectedIds excluding current node)
+        const contextIds = (graphRef.value.selectedNodeIds || []).filter(
+          (id) => id !== node.id
+        );
+
         if (graphRef.value && graphRef.value.startPathAnimation) {
-          graphRef.value.startPathAnimation(pathNodeIds);
+          graphRef.value.startPathAnimation(pathNodeIds, contextIds);
         }
       }
     }
