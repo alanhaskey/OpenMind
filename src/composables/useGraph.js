@@ -112,19 +112,43 @@ export function useGraph(width, height) {
 
   const removeNodes = (nodeIds) => {
     if (!nodeIds || nodeIds.length === 0) return;
+
+    // Find all descendants recursively
+    const nodesToDelete = new Set(nodeIds);
+    let stack = [...nodeIds];
+
+    while (stack.length > 0) {
+      const parentId = stack.pop();
+
+      // Find children: links where source == parentId
+      const childrenLinks = links.value.filter(l => {
+        const sId = typeof l.source === 'object' ? l.source.id : l.source;
+        return sId === parentId;
+      });
+
+      childrenLinks.forEach(link => {
+        const tId = typeof link.target === 'object' ? link.target.id : link.target;
+        if (!nodesToDelete.has(tId)) {
+          nodesToDelete.add(tId);
+          stack.push(tId);
+        }
+      });
+    }
+
+    const finalIds = Array.from(nodesToDelete);
     
     // Remove nodes
-    nodes.value = nodes.value.filter(n => !nodeIds.includes(n.id));
+    nodes.value = nodes.value.filter(n => !nodesToDelete.has(n.id));
     
     // Remove connected links
     links.value = links.value.filter(l => {
       const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
       const targetId = typeof l.target === 'object' ? l.target.id : l.target;
-      return !nodeIds.includes(sourceId) && !nodeIds.includes(targetId);
+      return !nodesToDelete.has(sourceId) && !nodesToDelete.has(targetId);
     });
 
     // Clean up selection
-    selectedNodeIds.value = selectedNodeIds.value.filter(id => !nodeIds.includes(id));
+    selectedNodeIds.value = selectedNodeIds.value.filter(id => !nodesToDelete.has(id));
     
     restartSimulation();
   };
