@@ -104,28 +104,40 @@ const handleNodeClick = async (node) => {
         let current = node;
         themes.push(current.text);
 
+        // Path for animation (Ids)
+        const pathNodeIds = [current.id];
+
         const allLinks = graphRef.value.links || [];
         const allNodes = graphRef.value.nodes || [];
-        
+
         // Trace back up to 20 levels
         for (let i = 0; i < 20; i++) {
-          const parentLink = allLinks.find(l => {
-            const tId = (typeof l.target === 'object') ? l.target.id : l.target;
+          const parentLink = allLinks.find((l) => {
+            const tId = typeof l.target === "object" ? l.target.id : l.target;
             return tId === current.id;
           });
 
           if (parentLink) {
-             const sId = (typeof parentLink.source === 'object') ? parentLink.source.id : parentLink.source;
-             const parent = allNodes.find(n => n.id === sId);
-             if (parent) {
-               themes.unshift(parent.text);
-               current = parent;
-             } else {
-               break;
-             }
+            const sId =
+              typeof parentLink.source === "object"
+                ? parentLink.source.id
+                : parentLink.source;
+            const parent = allNodes.find((n) => n.id === sId);
+            if (parent) {
+              themes.unshift(parent.text);
+              pathNodeIds.unshift(parent.id); // Add to start of path
+              current = parent;
+            } else {
+              break;
+            }
           } else {
             break;
           }
+        }
+
+        // Trigger Animation Start
+        if (graphRef.value && graphRef.value.startPathAnimation) {
+          graphRef.value.startPathAnimation(pathNodeIds);
         }
       }
     }
@@ -133,7 +145,13 @@ const handleNodeClick = async (node) => {
     const count = parseInt(localStorage.getItem("generate_count") || 6);
 
     // Call API with all params including new mode params
-    const related = await getRelatedWords(
+    // Wait for at least 1.5s animation AND the api call
+    const minAnimationTime = new Promise((resolve) =>
+      setTimeout(resolve, 1500)
+    );
+
+    // Perform API call
+    const apiCall = getRelatedWords(
       node.text,
       count,
       contextWords,
@@ -144,6 +162,21 @@ const handleNodeClick = async (node) => {
       customPrompt.value,
       documentContent.value
     );
+
+    // Initial wait (optional optimization: if strict mode is off, we might not want to wait 1.5s?
+    // But currently only doing animation in strict mode.
+    // If NOT strict mode, we shouldn't force wait.
+    let related;
+    if (strictMode.value) {
+      const [results] = await Promise.all([apiCall, minAnimationTime]);
+      related = results;
+      // Stop animation
+      if (graphRef.value && graphRef.value.stopPathAnimation) {
+        graphRef.value.stopPathAnimation();
+      }
+    } else {
+      related = await apiCall;
+    }
 
     if (related && Array.isArray(related)) {
       related.forEach((item) => {

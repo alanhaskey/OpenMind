@@ -106,7 +106,7 @@ const style = computed(() => ({
     from 0deg,
     transparent 0%,
     transparent 60%,
-    #ffa500 100%
+    color-mix(in srgb, var(--color-primary), black 25%) 100%
   );
   animation: rotate 1.5s linear infinite;
   /* Mask to create a border ring */

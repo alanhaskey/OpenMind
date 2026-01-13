@@ -8,7 +8,7 @@ const props = defineProps({
 const emit = defineEmits(["close"]);
 
 const defaultColor = "#ffff00";
-const presetColor = "#00ffff"; // Neon Blue/Cyan
+const presetColor = "#009dff"; // Neon Blue/Cyan
 const currentColor = ref(defaultColor);
 
 // Read from storage on mount

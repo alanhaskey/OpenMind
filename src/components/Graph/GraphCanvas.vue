@@ -129,6 +129,36 @@ defineExpose({
   exportGraphState,
   importGraphState,
   links,
+  startPathAnimation: (nodeIds) => {
+    if (!nodeIds || nodeIds.length < 2) return;
+
+    // 1. Highlight Nodes
+    nodeIds.forEach((id) => {
+      d3.select(`[data-node-id="${id}"]`).classed("highlight-node", true);
+    });
+
+    // 2. Highlight Links
+    // We need to match pairs in the path: (0->1), (1->2), etc.
+    const pairs = [];
+    for (let i = 0; i < nodeIds.length - 1; i++) {
+      pairs.push({ source: nodeIds[i], target: nodeIds[i + 1] });
+    }
+
+    // Identify and highlight links provided by current state
+    pairs.forEach((p) => {
+      // Search for line element matching this pair (ignoring direction)
+      const selector = `line[data-source="${p.source}"][data-target="${p.target}"], line[data-source="${p.target}"][data-target="${p.source}"]`;
+      const linkEl = d3.select(selector);
+      if (!linkEl.empty()) {
+        linkEl.classed("highlight-link", true).raise();
+      }
+    });
+  },
+
+  stopPathAnimation: () => {
+    d3.selectAll(".highlight-node").classed("highlight-node", false);
+    d3.selectAll(".highlight-link").classed("highlight-link", false);
+  },
 });
 
 // Helper for line coordinates
@@ -153,7 +183,18 @@ const isNodeLastSelected = (node) => {
       <svg class="graph-svg">
         <line
           v-for="link in links"
-          :key="link.id || link.source.id + '-' + link.target.id"
+          :key="
+            link.id ||
+            (typeof link.source === 'object' ? link.source.id : link.source) +
+              '-' +
+              (typeof link.target === 'object' ? link.target.id : link.target)
+          "
+          :data-source="
+            typeof link.source === 'object' ? link.source.id : link.source
+          "
+          :data-target="
+            typeof link.target === 'object' ? link.target.id : link.target
+          "
           :x1="link.source.x"
           :y1="link.source.y"
           :x2="link.target.x"
@@ -167,6 +208,7 @@ const isNodeLastSelected = (node) => {
           <NodePiece
             v-for="node in nodes"
             :key="node.id"
+            :data-node-id="node.id"
             :node="node"
             :isLoading="node.isLoading"
             :expanded="node.expanded"
@@ -245,10 +287,50 @@ const isNodeLastSelected = (node) => {
   transform: translate(var(--x), var(--y)) translate(-50%, -50%) scale(0);
 }
 
-/* Ensure stable position when not animating (handled by NodePiece, but good to ensure overridden) */
+/* Ensure stable position when not animating */
 .node-pop-enter-to,
 .node-pop-leave-from {
   opacity: 1;
   transform: translate(var(--x), var(--y)) translate(-50%, -50%) scale(1);
+}
+
+/* Link Bridge Mode Animations */
+/* Link Bridge Mode Animations */
+:deep(.highlight-link) {
+  stroke: var(--color-primary, #3498db) !important;
+  stroke-width: 4px !important;
+  stroke-dasharray: 10, 5;
+  animation: dash-flow 0.5s linear infinite;
+  opacity: 1 !important;
+  filter: drop-shadow(0 0 5px var(--color-primary, #3498db));
+}
+
+:deep(.highlight-node) {
+  /* IMPORTANT: Must maintain the translate to keep position! */
+  transform: translate(var(--x), var(--y)) translate(-50%, -50%);
+  z-index: 100; /* Ensure on top */
+  animation: node-pulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes dash-flow {
+  from {
+    stroke-dashoffset: 15;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes node-pulse {
+  from {
+    box-shadow: 0 0 10px var(--color-primary, #3498db),
+      inset 0 0 10px var(--color-primary, #3498db);
+    border-color: var(--color-primary, #3498db);
+  }
+  to {
+    box-shadow: 0 0 25px var(--color-primary, #3498db),
+      inset 0 0 20px var(--color-primary, #3498db);
+    border-color: white;
+  }
 }
 </style>
