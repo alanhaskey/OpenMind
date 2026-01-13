@@ -26,7 +26,7 @@ const generateCount = ref(6);
 const activeTab = ref("general"); // 'general', 'ai', 'search'
 
 const tabs = computed(() => [
-  { id: "general", label: t("menu.settings") }, // Reuse 'Settings' or 'General' if avail
+  { id: "general", label: t("modal.settings.general") }, // Reuse 'Settings' or 'General' if avail
   { id: "ai", label: t("modal.settings.provider") },
   { id: "search", label: t("modal.settings.searchConfig") },
 ]);

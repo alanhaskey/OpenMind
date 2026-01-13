@@ -24,6 +24,7 @@
     },
     "settings": {
       "title": "Settings",
+      "general": "General",
       "apiKey": "Gemini API Key",
       "apiPlaceholder": "Enter your API Key",
       "provider": "AI Provider",

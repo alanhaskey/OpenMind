@@ -24,6 +24,7 @@
     },
     "settings": {
       "title": "设置",
+      "general": "通用",
       "apiKey": "Gemini API Key",
       "apiPlaceholder": "输入您的 API Key",
       "provider": "AI 供应商",
