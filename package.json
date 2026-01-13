@@ -2,6 +2,10 @@
   "name": "open-mind-app",
   "private": true,
   "version": "1.0.5",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alanhaskey/OpenMind"
+  },
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {

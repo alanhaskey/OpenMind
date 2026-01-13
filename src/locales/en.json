@@ -80,7 +80,8 @@
     "genFail": "Generation failed, please try again",
     "maxSelection": "Max selection limit reached ({limit})",
     "docLoaded": "Document content loaded",
-    "docUnsupported": "Only .txt and .md files are supported"
+    "docUnsupported": "Only .txt and .md files are supported",
+    "update": "New version available now "
   },
   "ui": {
     "language": "Language",

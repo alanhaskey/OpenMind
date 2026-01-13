@@ -16,6 +16,7 @@ import ThemeColorModal from "./components/UI/ThemeColorModal.vue";
 import CustomPromptModal from "./components/UI/CustomPromptModal.vue";
 
 import { getRelatedWords } from "./services/aiService";
+import { checkForUpdates } from "./services/updateService";
 import { useI18n } from "vue-i18n";
 
 const { t, locale } = useI18n();
@@ -434,6 +435,15 @@ onMounted(() => {
   if (storedColor) {
     document.documentElement.style.setProperty("--color-primary", storedColor);
   }
+
+  // Check for updates
+  checkForUpdates().then((result) => {
+    if (result.hasUpdate) {
+      showToastMessage(`${t("toast.update")}: ${result.latestVersion}`, "info");
+      // Optional: Add click handler logic for toast or separate persistent UI
+      // For now, simple console log or maybe we need a dedicated update modal/toast interactive
+    }
+  });
 });
 
 onUnmounted(() => {
