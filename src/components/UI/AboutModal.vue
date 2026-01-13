@@ -1,6 +1,10 @@
 <script setup>
 defineProps({
   show: Boolean,
+  updateInfo: {
+    type: Object,
+    default: null,
+  },
 });
 
 const emit = defineEmits(["close"]);
@@ -33,7 +37,10 @@ const version = __APP_VERSION__;
           </div>
           <div class="row">
             <span class="label">{{ $t("modal.about.version") }}</span>
-            <span class="value">v{{ version }}</span>
+            <div class="version-wrapper">
+              <span class="value">v{{ version }}</span>
+              <span v-if="updateInfo?.hasUpdate" class="update-badge">New</span>
+            </div>
           </div>
         </div>
 
@@ -63,12 +70,13 @@ const version = __APP_VERSION__;
 }
 
 .modal {
-  width: 320px;
+  width: 340px;
   padding: 24px;
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.95);
   text-align: center;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  color: var(--color-text);
 }
 
 h3 {
@@ -104,6 +112,21 @@ h3 {
   font-weight: 500;
   color: var(--color-text);
   user-select: text; /* Allow copying email */
+}
+
+.version-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.update-badge {
+  font-size: 10px;
+  background: #ff4757;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-weight: bold;
 }
 
 .actions {

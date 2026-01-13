@@ -35,6 +35,7 @@ const showCustomPromptModal = ref(false);
 const strictMode = ref(false);
 const isSearchEnabled = ref(false); // Search Toggle State
 const hasSerperKey = ref(false); // Dynamic Key Availability
+const updateInfo = ref(null);
 
 const associationMode = ref("related");
 const customPrompt = ref("");
@@ -478,9 +479,8 @@ onMounted(() => {
   // Check for updates
   checkForUpdates().then((result) => {
     if (result.hasUpdate) {
+      updateInfo.value = result;
       showToastMessage(`${t("toast.update")}: ${result.latestVersion}`, "info");
-      // Optional: Add click handler logic for toast or separate persistent UI
-      // For now, simple console log or maybe we need a dedicated update modal/toast interactive
     }
   });
 });
@@ -568,7 +568,11 @@ onUnmounted(() => {
       @save="handleSettingsSave"
     />
 
-    <AboutModal :show="showAboutModal" @close="showAboutModal = false" />
+    <AboutModal
+      :show="showAboutModal"
+      :update-info="updateInfo"
+      @close="showAboutModal = false"
+    />
 
     <NodeActions
       :show="hasSelection"
