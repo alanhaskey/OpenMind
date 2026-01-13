@@ -1,18 +1,41 @@
-import { ref, reactive, onMounted, onUnmounted } from 'vue';
+import { ref, reactive, onMounted, onUnmounted, computed } from 'vue';
 import * as d3 from 'd3';
 
 export function useGraph(width, height) {
   const nodes = ref([]);
   const links = ref([]);
   const selectedNodeIds = ref([]); // Array of strings
+  const hiddenRootIds = ref(new Set()); // Set of rootIds that are hidden
   const simulation = ref(null);
+
+  // Computed properties for visible graph elements
+  // We use these for the simulation to ensure hidden nodes don't affect layout
+  const visibleNodes = computed(() => {
+    return nodes.value.filter(n => !hiddenRootIds.value.has(n.rootId));
+  });
+
+  const visibleLinks = computed(() => {
+    return links.value.filter(l => {
+      // Handle both object references (d3) and raw IDs
+      const sId = typeof l.source === 'object' ? l.source.id : l.source;
+      const tId = typeof l.target === 'object' ? l.target.id : l.target;
+      
+      const sourceNode = nodes.value.find(n => n.id === sId);
+      const targetNode = nodes.value.find(n => n.id === tId);
+      
+      if (!sourceNode || !targetNode) return false;
+      
+      return !hiddenRootIds.value.has(sourceNode.rootId) && 
+             !hiddenRootIds.value.has(targetNode.rootId);
+    });
+  });
 
   // Initialize simulation
   const initSimulation = (w, h) => {
-    simulation.value = d3.forceSimulation(nodes.value)
+    simulation.value = d3.forceSimulation(visibleNodes.value)
       .force('charge', d3.forceManyBody().strength(-100))
       .force('center', d3.forceCenter(w / 2, h / 2))
-      .force('link', d3.forceLink(links.value).id(d => d.id).distance(100))
+      .force('link', d3.forceLink(visibleLinks.value).id(d => d.id).distance(100))
       .force('collide', d3.forceCollide().radius(55).iterations(2))
       .on('tick', () => {
         // Trigger reactivity for position updates if needed
@@ -30,6 +53,21 @@ export function useGraph(width, height) {
       targetParentId = selectedNodeIds.value[selectedNodeIds.value.length - 1];
     }
 
+    // Determine rootId
+    let rootId = id; // Default to self if no parent (new root)
+    if (targetParentId) {
+      const parent = nodes.value.find(n => n.id === targetParentId);
+      if (parent) {
+        rootId = parent.rootId || parent.id; // Inherit rootId
+        
+        // If parent is hidden, we should probably unhide the root to show the new node?
+        // Or just let it be added but hidden. Let's unhide for better UX.
+        if (hiddenRootIds.value.has(rootId)) {
+          hiddenRootIds.value.delete(rootId);
+        }
+      }
+    }
+
     const newNode = {
       id,
       text,
@@ -39,6 +77,7 @@ export function useGraph(width, height) {
       isSelected: false,
       isCenter: !targetParentId,
       expanded: false,
+      rootId: rootId // Assign rootId
     };
 
     if (targetParentId) {
@@ -62,14 +101,34 @@ export function useGraph(width, height) {
   const restartSimulation = () => {
     if (!simulation.value) return;
     
-    simulation.value.nodes(nodes.value);
-    simulation.value.force('link').links(links.value);
+    // Update simulation with visible nodes only
+    simulation.value.nodes(visibleNodes.value);
+    simulation.value.force('link').links(visibleLinks.value);
     simulation.value.alpha(1).restart();
+  };
+
+  const toggleSheetVisibility = (rootId) => {
+    if (hiddenRootIds.value.has(rootId)) {
+      const newSet = new Set(hiddenRootIds.value);
+      newSet.delete(rootId);
+      hiddenRootIds.value = newSet;
+    } else {
+      const newSet = new Set(hiddenRootIds.value);
+      newSet.add(rootId);
+      hiddenRootIds.value = newSet;
+      // Deselect any nodes in the hidden sheet
+      const hiddenNodes = nodes.value.filter(n => n.rootId === rootId);
+      hiddenNodes.forEach(n => {
+        if (n.isSelected) toggleSelection(n.id); // Toggle off
+      });
+    }
+    restartSimulation();
   };
 
   const toggleSelection = (nodeId) => {
     const node = nodes.value.find(n => n.id === nodeId);
-    if (!node) return;
+    // If node is hidden, don't select
+    if (!node || hiddenRootIds.value.has(node.rootId)) return;
 
     const index = selectedNodeIds.value.indexOf(nodeId);
 
@@ -102,6 +161,7 @@ export function useGraph(width, height) {
     nodes.value = [];
     links.value = [];
     selectedNodeIds.value = [];
+    hiddenRootIds.value.clear();
     restartSimulation();
   };
 
@@ -192,7 +252,13 @@ export function useGraph(width, height) {
 
   const exportGraphState = () => {
     return {
-      nodes: nodes.value.map(n => ({...n, fx: null, fy: null})), // Clean up fixed positions if any
+      nodes: nodes.value.map(n => ({
+        ...n, 
+        fx: null, 
+        fy: null,
+        // Ensure rootId is exported
+        rootId: n.rootId
+      })),
       links: links.value.map(l => {
         // Serialize links back to IDs
         const source = typeof l.source === 'object' ? l.source.id : l.source;
@@ -212,18 +278,64 @@ export function useGraph(width, height) {
     
     // Allow Vue to react to clearGraph first
     setTimeout(() => {
-      nodes.value = data.nodes.map(n => ({
+      // Reconstitute rootId if missing (for legacy data compatibility)
+      // A naive approach for legacy data: assume islands are trees roughly?
+      // Or just map isCenter=true to new rootIds.
+      // Better: In a second pass or simple assumption.
+      
+      const importedNodes = data.nodes.map(n => ({
         ...n,
         x: n.x || width/2,
         y: n.y || height/2,
         vx: 0, 
-        vy: 0
+        vy: 0,
+        // Fallback for rootId
+        rootId: n.rootId || (n.isCenter ? n.id : null)
       }));
+
+      // If legacy data had no rootIds, children might still have null rootId.
+      // We can try to repair it. 
+      // Repair pass:
+      const nodeMap = new Map(importedNodes.map(n => [n.id, n]));
       
-      links.value = (data.links || []).map(l => ({
+      // We need to trace parents. Links are needed.
+      const importedLinks = (data.links || []).map(l => ({
         source: l.source,
         target: l.target
       }));
+
+      // Adjacency for parent lookup (Child -> Parent)
+      const parentMap = new Map();
+      importedLinks.forEach(l => {
+        parentMap.set(l.target, l.source);
+      });
+
+      // Recursive function to find root
+      const findRoot = (nodeId, visited = new Set()) => {
+        if (visited.has(nodeId)) return nodeId; // Cycle? Return self as fail-safe
+        visited.add(nodeId);
+        
+        const node = nodeMap.get(nodeId);
+        if (!node) return nodeId;
+        if (node.isCenter) return node.id;
+        if (node.rootId) return node.rootId;
+        
+        const parentId = parentMap.get(nodeId);
+        if (parentId) {
+          const root = findRoot(parentId, visited);
+          return root;
+        }
+        return nodeId; // Orphan? Treat as root
+      };
+
+      importedNodes.forEach(n => {
+        if (!n.rootId) {
+          n.rootId = findRoot(n.id);
+        }
+      });
+      
+      nodes.value = importedNodes;
+      links.value = importedLinks;
       
       restartSimulation();
     }, 50);
@@ -254,9 +366,13 @@ export function useGraph(width, height) {
   return {
     nodes,
     links,
+    visibleNodes,
+    visibleLinks,
     addNode,
     toggleSelection,
     selectedNodeIds,
+    hiddenRootIds,
+    toggleSheetVisibility,
     initSimulation,
     updateDimensions,
     simulation,

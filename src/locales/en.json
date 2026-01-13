@@ -110,5 +110,8 @@
     "learning": "Learning",
     "document": "Document Context",
     "custom": "Custom Prompt"
+  },
+  "sheet": {
+    "new": "New Sheet"
   }
 }

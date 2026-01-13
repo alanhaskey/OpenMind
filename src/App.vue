@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch, unref } from "vue";
 import GraphCanvas from "./components/Graph/GraphCanvas.vue";
 import InputBar from "./components/UI/InputBar.vue";
 import LogoPiece from "./components/UI/LogoPiece.vue";
@@ -14,6 +14,7 @@ import LanguageSelector from "./components/UI/LanguageSelector.vue";
 import Toast from "./components/UI/Toast.vue";
 import ThemeColorModal from "./components/UI/ThemeColorModal.vue";
 import CustomPromptModal from "./components/UI/CustomPromptModal.vue";
+import SheetBar from "./components/UI/SheetBar.vue";
 
 import { getRelatedWords } from "./services/aiService";
 import { checkForUpdates } from "./services/updateService";
@@ -428,6 +429,32 @@ watch(
   { deep: true }
 );
 
+// Sheet Bar Logic
+const graphNodes = computed(() => unref(graphRef.value?.nodes) || []);
+const graphHiddenRootIds = computed(
+  () => unref(graphRef.value?.hiddenRootIds) || new Set()
+);
+
+watch(
+  () => graphNodes.value.length,
+  (newLength) => {
+    if (newLength === 0 && hasStarted.value) {
+      hasStarted.value = false;
+    }
+  }
+);
+
+const handleToggleSheetVisibility = (rootId) => {
+  graphRef.value?.toggleSheetVisibility(rootId);
+};
+
+const handleNewSheet = () => {
+  graphRef.value?.clearSelection();
+  if (inputBarRef.value) {
+    inputBarRef.value.focus();
+  }
+};
+
 onMounted(() => {
   window.addEventListener("keydown", handleKeydown);
 
@@ -495,6 +522,13 @@ onUnmounted(() => {
       @submit="handleInputSubmit"
       @request-custom-prompt="onRequestCustomPrompt"
       @request-document-upload="onRequestDocumentUpload"
+    />
+
+    <SheetBar
+      :nodes="graphNodes"
+      :hidden-root-ids="graphHiddenRootIds"
+      @toggle-visibility="handleToggleSheetVisibility"
+      @new-sheet="handleNewSheet"
     />
 
     <ControlPanel

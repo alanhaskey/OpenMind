@@ -16,6 +16,8 @@ const transformStyle = ref({ transform: "translate(0,0) scale(1)" });
 const {
   nodes,
   links,
+  visibleNodes,
+  visibleLinks,
   initSimulation,
   updateDimensions,
   addNode,
@@ -31,6 +33,8 @@ const {
   dragEnded,
   exportGraphState,
   importGraphState,
+  hiddenRootIds,
+  toggleSheetVisibility,
 } = useGraph(width.value, height.value);
 
 const handleResize = () => {
@@ -128,6 +132,8 @@ defineExpose({
   panToNode,
   exportGraphState,
   importGraphState,
+  hiddenRootIds,
+  toggleSheetVisibility,
   links,
   startPathAnimation: (nodeIds, contextNodeIds = []) => {
     // 1. Highlight Path Nodes
@@ -195,7 +201,7 @@ const isNodeLastSelected = (node) => {
     <div class="graph-content" :style="transformStyle">
       <svg class="graph-svg">
         <line
-          v-for="link in links"
+          v-for="link in visibleLinks"
           :key="
             link.id ||
             (typeof link.source === 'object' ? link.source.id : link.source) +
@@ -219,7 +225,7 @@ const isNodeLastSelected = (node) => {
       <div class="nodes-layer">
         <TransitionGroup name="node-pop">
           <NodePiece
-            v-for="node in nodes"
+            v-for="node in visibleNodes"
             :key="node.id"
             :data-node-id="node.id"
             :node="node"

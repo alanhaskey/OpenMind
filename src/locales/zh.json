@@ -110,5 +110,8 @@
     "learning": "学习联想",
     "document": "文档联想",
     "custom": "自定义联想"
+  },
+  "sheet": {
+    "new": "新建画布"
   }
 }
