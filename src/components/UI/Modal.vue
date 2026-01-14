@@ -5,7 +5,7 @@ defineProps({
   message: String,
 });
 
-const emit = defineEmits(['confirm', 'cancel']);
+const emit = defineEmits(["confirm", "cancel"]);
 </script>
 
 <template>
@@ -15,8 +15,12 @@ const emit = defineEmits(['confirm', 'cancel']);
         <h3>{{ title }}</h3>
         <p>{{ message }}</p>
         <div class="actions">
-          <button class="btn cancel" @click="$emit('cancel')">取消</button>
-          <button class="btn confirm" @click="$emit('confirm')">确定</button>
+          <button class="btn cancel" @click="$emit('cancel')">
+            {{ $t("modal.reset.cancel") }}
+          </button>
+          <button class="btn confirm" @click="$emit('confirm')">
+            {{ $t("modal.reset.confirm") }}
+          </button>
         </div>
       </div>
     </div>
@@ -44,7 +48,7 @@ const emit = defineEmits(['confirm', 'cancel']);
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.9);
   text-align: center;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
 h3 {
