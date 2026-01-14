@@ -9,6 +9,8 @@ const props = defineProps({
   isLoading: Boolean,
   isLastSelected: Boolean,
   expanded: Boolean,
+  isHighlighted: Boolean,
+  isContext: Boolean,
 });
 
 const emit = defineEmits(["click", "contextmenu"]);
@@ -35,6 +37,8 @@ const style = computed(() => ({
       center: isCenter,
       loading: isLoading,
       expanded: expanded && !isCenter,
+      'highlight-node': isHighlighted,
+      'highlight-context': isContext,
     }"
     :style="style"
     @click.stop="emit('click', node)"

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from "vue";
+import { ref, onMounted, onUnmounted, watch, computed } from "vue";
 import * as d3 from "d3";
 import { useGraph } from "../../composables/useGraph";
 import NodePiece from "./NodePiece.vue";
@@ -12,6 +12,14 @@ const container = ref(null);
 const width = ref(window.innerWidth);
 const height = ref(window.innerHeight);
 const transformStyle = ref({ transform: "translate(0,0) scale(1)" });
+
+// Viewport State for Culling
+const viewState = ref({ x: 0, y: 0, k: 1 });
+
+// Highlight State (Persistent across culling)
+const pathNodeIds = ref(new Set());
+const contextNodeIds = ref(new Set());
+const highlightedLinkKeys = ref(new Set());
 
 const {
   nodes,
@@ -57,6 +65,8 @@ const initZoom = () => {
         transform: `translate(${x}px, ${y}px) scale(${k})`,
         transformOrigin: "0 0",
       };
+      // Update View State for Culling
+      viewState.value = { x, y, k };
     })
     // Filter out drag events on nodes to prevent zoom while dragging
     .filter((event) => {
@@ -66,6 +76,63 @@ const initZoom = () => {
 
   zoomBehavior.value = zoom;
   d3.select(container.value).call(zoom);
+};
+
+// --- Viewport Culling Logic ---
+
+// Calculate the visible bounding box in graph coordinates
+const viewportBounds = computed(() => {
+  const { x, y, k } = viewState.value;
+  // Buffer to render nodes slightly off-screen for smooth panning
+  const buffer = 25;
+
+  // Inverse transform: graphX = (screenX - tx) / k
+  const minX = (0 - x) / k - buffer;
+  const maxX = (width.value - x) / k + buffer;
+  const minY = (0 - y) / k - buffer;
+  const maxY = (height.value - y) / k + buffer;
+
+  return { minX, maxX, minY, maxY };
+});
+
+const renderedNodes = computed(() => {
+  const { minX, maxX, minY, maxY } = viewportBounds.value;
+  return visibleNodes.value.filter((node) => {
+    // Only check position, assuming node radius ~60px
+    return (
+      node.x >= minX - 60 &&
+      node.x <= maxX + 60 &&
+      node.y >= minY - 60 &&
+      node.y <= maxY + 60
+    );
+  });
+});
+
+const renderedLinks = computed(() => {
+  // Option 1: Only render links where BOTH nodes are visible (Strict Culling)
+  // Option 2: Render links where AT LEAST ONE node is visible (Better UX)
+  // Let's go with Option 2 to avoid links popping in too late.
+  const { minX, maxX, minY, maxY } = viewportBounds.value;
+
+  // Helper to check if a point is in bounds
+  const inBounds = (x, y) =>
+    x >= minX - 60 && x <= maxX + 60 && y >= minY - 60 && y <= maxY + 60;
+
+  return visibleLinks.value.filter((link) => {
+    // Check if source or target is in bounds
+    // Note: link.source/target are objects from D3
+    return (
+      inBounds(link.source.x, link.source.y) ||
+      inBounds(link.target.x, link.target.y)
+    );
+  });
+});
+
+// Helper to generate consistent link keys
+const getLinkKey = (link) => {
+  const sId = typeof link.source === "object" ? link.source.id : link.source;
+  const tId = typeof link.target === "object" ? link.target.id : link.target;
+  return `${sId}-${tId}`;
 };
 
 // Pan to center a node smoothly
@@ -86,7 +153,7 @@ const panToNode = (node) => {
   // Animate to the new position
   d3.select(container.value)
     .transition()
-    .duration(1000)
+    .duration(1500)
     .ease(d3.easeCubicInOut)
     .call(
       zoomBehavior.value.transform,
@@ -135,48 +202,40 @@ defineExpose({
   hiddenRootIds,
   toggleSheetVisibility,
   links,
-  startPathAnimation: (nodeIds, contextNodeIds = []) => {
+  startPathAnimation: (nodeIds, cNodeIds = []) => {
     // 1. Highlight Path Nodes
     if (nodeIds && nodeIds.length > 0) {
-      nodeIds.forEach((id) => {
-        d3.select(`[data-node-id="${id}"]`).classed("highlight-node", true);
-      });
+      pathNodeIds.value = new Set(nodeIds);
+    } else {
+      pathNodeIds.value = new Set();
     }
 
     // 2. Highlight Context Nodes (Background Reference)
-    if (contextNodeIds && contextNodeIds.length > 0) {
-      contextNodeIds.forEach((id) => {
-        // Only highlight if not already highlighted as part of path
-        if (!nodeIds || !nodeIds.includes(id)) {
-          d3.select(`[data-node-id="${id}"]`).classed(
-            "highlight-context",
-            true
-          );
-        }
-      });
+    if (cNodeIds && cNodeIds.length > 0) {
+      // Filter out nodes that are already in path
+      const filtered = cNodeIds.filter((id) => !pathNodeIds.value.has(id));
+      contextNodeIds.value = new Set(filtered);
+    } else {
+      contextNodeIds.value = new Set();
     }
 
-    // 3. Highlight Links (only for path)
+    // 3. Highlight Links
+    highlightedLinkKeys.value = new Set();
     if (nodeIds && nodeIds.length >= 2) {
-      const pairs = [];
       for (let i = 0; i < nodeIds.length - 1; i++) {
-        pairs.push({ source: nodeIds[i], target: nodeIds[i + 1] });
+        const source = nodeIds[i];
+        const target = nodeIds[i + 1];
+        // Add both directions just in case link is defined inversely
+        highlightedLinkKeys.value.add(`${source}-${target}`);
+        highlightedLinkKeys.value.add(`${target}-${source}`);
       }
-
-      pairs.forEach((p) => {
-        const selector = `line[data-source="${p.source}"][data-target="${p.target}"], line[data-source="${p.target}"][data-target="${p.source}"]`;
-        const linkEl = d3.select(selector);
-        if (!linkEl.empty()) {
-          linkEl.classed("highlight-link", true).raise();
-        }
-      });
     }
   },
 
   stopPathAnimation: () => {
-    d3.selectAll(".highlight-node").classed("highlight-node", false);
-    d3.selectAll(".highlight-link").classed("highlight-link", false);
-    d3.selectAll(".highlight-context").classed("highlight-context", false);
+    pathNodeIds.value.clear();
+    contextNodeIds.value.clear();
+    highlightedLinkKeys.value.clear();
   },
 });
 
@@ -201,13 +260,11 @@ const isNodeLastSelected = (node) => {
     <div class="graph-content" :style="transformStyle">
       <svg class="graph-svg">
         <line
-          v-for="link in visibleLinks"
-          :key="
-            link.id ||
-            (typeof link.source === 'object' ? link.source.id : link.source) +
-              '-' +
-              (typeof link.target === 'object' ? link.target.id : link.target)
-          "
+          v-for="link in renderedLinks"
+          :key="getLinkKey(link)"
+          :class="{
+            'highlight-link': highlightedLinkKeys.has(getLinkKey(link)),
+          }"
           :data-source="
             typeof link.source === 'object' ? link.source.id : link.source
           "
@@ -225,13 +282,15 @@ const isNodeLastSelected = (node) => {
       <div class="nodes-layer">
         <TransitionGroup name="node-pop">
           <NodePiece
-            v-for="node in visibleNodes"
+            v-for="node in renderedNodes"
             :key="node.id"
             :data-node-id="node.id"
             :node="node"
             :isLoading="node.isLoading"
             :expanded="node.expanded"
             :is-last-selected="isNodeLastSelected(node)"
+            :is-highlighted="pathNodeIds.has(node.id)"
+            :is-context="contextNodeIds.has(node.id)"
             v-draggable="node"
             @click="(n) => emit('node-click', n)"
             @contextmenu="(n) => emit('node-contextmenu', n)"
