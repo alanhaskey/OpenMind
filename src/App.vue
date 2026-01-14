@@ -4,7 +4,7 @@ import GraphCanvas from "./components/Graph/GraphCanvas.vue";
 import InputBar from "./components/UI/InputBar.vue";
 import LogoPiece from "./components/UI/LogoPiece.vue";
 import ControlPanel from "./components/UI/ControlPanel.vue";
-import Modal from "./components/UI/Modal.vue";
+import ResetModal from "./components/UI/ResetModal.vue";
 import SettingsModal from "./components/UI/SettingsModal.vue";
 import AboutModal from "./components/UI/AboutModal.vue";
 import NodeActions from "./components/UI/NodeActions.vue";
@@ -582,7 +582,7 @@ onUnmounted(() => {
       @themeColor="onThemeColorRequest"
     />
 
-    <Modal
+    <ResetModal
       :show="showResetModal"
       :title="t('modal.reset.title')"
       :message="t('modal.reset.message')"
