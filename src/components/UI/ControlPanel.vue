@@ -12,7 +12,7 @@ const emit = defineEmits([
 </script>
 
 <template>
-  <div class="control-panel glass">
+  <div class="control-panel glass" v-bind="$attrs">
     <button
       class="btn"
       @click="$emit('fullscreen')"

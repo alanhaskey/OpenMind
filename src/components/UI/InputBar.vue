@@ -290,7 +290,6 @@ defineExpose({
   top: 50%;
   transform: translate(-50%, -15%);
   transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
-  width: 100%;
   display: flex;
   justify-content: center;
   z-index: 100;

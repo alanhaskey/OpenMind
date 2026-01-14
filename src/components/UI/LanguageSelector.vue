@@ -91,8 +91,8 @@ const currentLabel = computed(() => {
 <style scoped>
 .language-selector {
   position: absolute;
-  top: 30px;
-  right: 140px;
+  top: 10px;
+  right: 115px;
   border-radius: 20px;
   z-index: 100;
   user-select: none;

@@ -19,6 +19,8 @@ import SheetBar from "./components/UI/SheetBar.vue";
 import { getRelatedWords } from "./services/aiService";
 import { checkForUpdates } from "./services/updateService";
 import { useI18n } from "vue-i18n";
+import { version as appVersion } from "../package.json";
+import OnboardingTour from "./components/UI/OnboardingTour.vue";
 
 const { t, locale } = useI18n();
 
@@ -36,6 +38,7 @@ const strictMode = ref(false);
 const isSearchEnabled = ref(false); // Search Toggle State
 const hasSerperKey = ref(false); // Dynamic Key Availability
 const updateInfo = ref(null);
+const showOnboarding = ref(false);
 
 const associationMode = ref("related");
 const customPrompt = ref("");
@@ -466,6 +469,21 @@ const handleNewSheet = () => {
   }
 };
 
+// Help/Onboarding Flow
+const checkOnboardingStatus = () => {
+  const lastSeenVersion = localStorage.getItem("last_seen_version");
+  // Simple semver compare not strictly needed if we assume strict equality for tour trigger
+  if (!lastSeenVersion || lastSeenVersion !== appVersion) {
+    // New User or Updated Version
+    showOnboarding.value = true;
+  }
+};
+
+const handleOnboardingComplete = () => {
+  showOnboarding.value = false;
+  localStorage.setItem("last_seen_version", appVersion);
+};
+
 onMounted(() => {
   window.addEventListener("keydown", handleKeydown);
 
@@ -475,6 +493,11 @@ onMounted(() => {
   }
 
   checkSerperKey(); // Check key on mount
+
+  // Check Onboarding
+  setTimeout(() => {
+    checkOnboardingStatus();
+  }, 1000); // Slight delay for UI to settle
 
   // Check for updates
   checkForUpdates().then((result) => {
@@ -492,10 +515,13 @@ onUnmounted(() => {
 
 <template>
   <div id="app-container">
-    <LogoPiece @click="showAboutModal = true" />
+    <LogoPiece id="about-trigger" @click="showAboutModal = true" />
 
-    <StrictModeToggle v-model="strictMode" />
-    <LanguageSelector />
+    <div id="top-right-controls">
+      <StrictModeToggle v-model="strictMode" />
+      <LanguageSelector />
+    </div>
+
     <Toast
       v-if="showToast"
       :message="toastMessage"
@@ -528,6 +554,7 @@ onUnmounted(() => {
     />
 
     <InputBar
+      id="input-bar-container"
       ref="inputBarRef"
       :has-started="hasStarted"
       v-model:associationMode="associationMode"
@@ -546,6 +573,7 @@ onUnmounted(() => {
     />
 
     <ControlPanel
+      id="control-panel-container"
       @reset="onResetRequest"
       @settings="onSettingsRequest"
       @export="onExportRequest"
@@ -599,6 +627,12 @@ onUnmounted(() => {
       :show="showThemeColorModal"
       @close="showThemeColorModal = false"
     />
+
+    <OnboardingTour
+      :show="showOnboarding"
+      @close="handleOnboardingComplete"
+      @complete="handleOnboardingComplete"
+    />
   </div>
 </template>
 
@@ -607,5 +641,16 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   position: relative;
+}
+
+#top-right-controls {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  height: 60px;
+  width: 240px;
 }
 </style>

@@ -52,10 +52,17 @@
       "maxNodesPlaceholder": "可选（默认无限制）",
       "maxGenPlaceholder": "默认 6",
       "searchConfig": "联网搜索",
-      "serperKey": "Serper API Key",
+      "serperKey": "API Key",
       "serviceUrl": "服务供应商 URL",
       "hintSerper": "从 serper.dev 获取 Key，用于联网搜索模式"
     },
+    "search": {
+      "placeholder": "输入关键词...",
+      "mode": "联想模式",
+      "strict": "严谨模式",
+      "searchToggle": "联网搜索"
+    },
+
     "edit": {
       "title": "编辑节点",
       "save": "保存",
@@ -77,6 +84,29 @@
       "save": "保存"
     }
   },
+  "onboarding": {
+    "input": {
+      "title": "开始头脑风暴！",
+      "content": "在此输入根关键词，点击左侧按钮可以调整联想模式。"
+    },
+    "topRight": {
+      "title": "词链与语言",
+      "content": "切换界面语言。开启“词链模式”(L) 即可在点击节点时用词链联想。"
+    },
+    "bottomRight": {
+      "title": "控制面板",
+      "content": "在此处访问设置、主题色、重置画布及导入导出功能。"
+    },
+    "topLeft": {
+      "title": "关于与更多",
+      "content": "点击 Logo 查看版本信息。（右键点击节点可触发更多操作！）"
+    },
+    "actions": {
+      "next": "下一步",
+      "skip": "跳过",
+      "done": "完成"
+    }
+  },
   "toast": {
     "importSuccess": "导入成功",
     "importFailFormat": "导入失败：文件格式不正确",
@@ -90,9 +120,9 @@
   },
   "ui": {
     "language": "语言",
-    "strictMode": "链接桥模式",
-    "strictModeOn": "链接桥模式：已开启 (L)",
-    "strictModeOff": "链接桥模式：已关闭 (L)",
+    "strictMode": "词链模式",
+    "strictModeOn": "词链模式：已开启 (L)",
+    "strictModeOff": "词链模式：已关闭 (L)",
     "inputPlaceholder": "输入一个核心概念...",
     "placeholders": [
       "头脑风暴一下...",

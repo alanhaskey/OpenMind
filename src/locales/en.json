@@ -52,10 +52,17 @@
       "maxNodesPlaceholder": "Optional (default no limit)",
       "maxGenPlaceholder": "Default 6",
       "searchConfig": "Internet Search",
-      "serperKey": "Serper API Key",
+      "serperKey": "API Key",
       "serviceUrl": "Service URL",
       "hintSerper": "Get key from serper.dev for Search Mode"
     },
+    "search": {
+      "placeholder": "Enter keyword...",
+      "mode": "Mode",
+      "strict": "Strict Mode",
+      "searchToggle": "Internet Search"
+    },
+
     "edit": {
       "title": "Edit Node",
       "save": "Save",
@@ -75,6 +82,29 @@
       "default": "Default",
       "backup": "Preset",
       "save": "Save"
+    }
+  },
+  "onboarding": {
+    "input": {
+      "title": "Start Brainstorming",
+      "content": "Type your core keyword here and press Enter to create the first node. Use the globe icon for internet search."
+    },
+    "topRight": {
+      "title": "Modes & Language",
+      "content": "Switch language here. Toggle 'Link Bridge Mode' (L) to visualize connections between nodes."
+    },
+    "bottomRight": {
+      "title": "Control Panel",
+      "content": "Access Settings, Theme Colors, Reset Canvas, and Export/Import features."
+    },
+    "topLeft": {
+      "title": "About & History",
+      "content": "Click the logo to view version info. (Right-click nodes for more actions!)"
+    },
+    "actions": {
+      "next": "Next",
+      "skip": "Skip",
+      "done": "Done"
     }
   },
   "toast": {

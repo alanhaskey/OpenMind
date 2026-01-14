@@ -42,8 +42,8 @@ const toggle = () => {
 <style scoped>
 .strict-mode-toggle {
   position: absolute;
-  top: 30px;
-  right: 30px;
+  top: 10px;
+  right: 10px;
   display: flex;
   align-items: center;
   padding: 8px 12px;
