@@ -173,12 +173,8 @@ defineExpose({
 <template>
   <div class="input-container" :class="{ 'at-bottom': hasStarted }">
     <div class="input-wrapper glass">
-      <!-- Mode Selector Icon (Only visible if not started) -->
-      <div
-        v-if="!hasStarted"
-        class="mode-selector-wrapper"
-        ref="modeSelectorRef"
-      >
+      <!-- Mode Selector Icon (Only visible if not started)  v-if="!hasStarted"-->
+      <div class="mode-selector-wrapper" ref="modeSelectorRef">
         <button
           class="mode-btn"
           @click="toggleModeMenu"
