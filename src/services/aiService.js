@@ -17,9 +17,10 @@ const createPrompt = (word, count, context, themes = [], strictMode = false, lan
   let instruction = "";
   switch (mode) {
     case 'custom':
-      // User defined prompt. We assume user uses {0} for word and {1} for count.
       if (customPrompt) {
-        return `请生成 ${count} 个与词语 '${word}' 相关的联想词。${contextStr}
+        const userInstruction = customPrompt.replace(/\{0\}/g, word).replace(/\{1\}/g, count);
+        return `请生成 ${count} 个与词语 '${word}' 相关的联想词。
+        ${userInstruction}${contextStr}
         要求：
         1. 必须返回标准的 JSON 数组格式。
         2. 每个对象只包含一个字段："word"。
